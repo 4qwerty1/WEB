@@ -65,6 +65,7 @@
         display: inline-block;
     }
 
+
     aside img {
         display: block;
         width: 80px;
@@ -122,15 +123,36 @@
         vertical-align: middle;
         padding: 20px;
     }
+
+    #center_gif {
+        display: block;
+    }
 }
 
 @media print {
     body {
         background: white;
         color: black;
+        padding: 20px;
     }
 
     .forscreen {
         display: none;
+    }
+
+    #center_column {
+        text-align: justify;
+    }
+
+    #center_column p {
+        text-align: center;
+    }
+
+    #center_column img {
+        display: none;
+    }
+
+    footer {
+        border-top: black 1px solid; /*147 minutes*/
     }
 }
