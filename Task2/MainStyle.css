@@ -108,10 +108,11 @@
     }
 
     #author {
-        width: 100%;
+        width: 70%;
         text-align: right;
+        margin-right: 30%;
         font-weight: bold;
-        display: block
+        display: block;
     }
 
     #right_column {
@@ -151,8 +152,15 @@
     #center_column img {
         display: none;
     }
+    #author {
+        width: 70%;
+        text-align: right;
+        margin-right: 30%;
+        font-weight: bold;
+        display: block;
+    }
 
     footer {
-        border-top: black 1px solid; /*147 minutes*/
+        border-top: black 1px solid;
     }
 }
