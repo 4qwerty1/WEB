@@ -9,22 +9,46 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body>
-	<div id="header" class="container-fluid sticky-top bg-dark text-white">
-		<div class=" row">
-			<a href="3.1.html" class="col-sm-1 p-2" style="text-align: center;"><img src="https://vignette.wikia.nocookie.net/knife-hit/images/c/c7/KH_B4.png/revision/latest?cb=20180519211419&path-prefix=ru" width="80rem" alt="Icon"></a>
-			<h2 class="col-sm-2 text-center font-weight-bold mt-auto mb-auto">Вкусные роллы</h2>
-			<ul class="col-sm-6 list-inline list-unstyled m-0 text-center">
-				<h3 class="list-inline-item mt-5"><a href="#" class="text-primary">first link</a></h3>
-				<h3 class="list-inline-item"><a href="#" class="text-secondary">second link</a></h3>
-				<h3 class="list-inline-item"><a href="#" class="text-secondary">third link</a></h3>
-			</ul>
-			<address class="col-sm-3 text-right mt-auto mb-auto">
-				<a href="../Task2/AboutMe.html"><span class="glyphicon glyphicon-info-sign mr-2"></span></a>
-				<strong>+7(****)307-715</strong> <br>
-				г. Москва, ул. Рочдельская, д. 14 <br>
-				Приём заказов c <strong>10:00</strong> до <strong>24:00</strong>
-			</address>
-		</div>
+	<div id="header" class="sticky-top">
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark justify-content-between" style="border-radius: 0">
+			<a class="navbar-brand p-2 h-100" href="#" style="text-align: center; float: left;">
+				<img src="https://vignette.wikia.nocookie.net/knife-hit/images/c/c7/KH_B4.png/revision/latest?cb=20180519211419&path-prefix=ru" width="80rem" class="d-inline-block mr-3" alt="Icon">
+				<span class="h3 font-weight-bold">Вкуссные роллы</span>
+			</a>	
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent, #navbarSupportedContent1" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav" style="float: right">
+					<li class="nav-item active">
+						<a class="nav-link" href="3.1.html"><span class="h3 font-weight-bold">Main</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="SVG print.html"><span class="h3 font-weight-bold">SVG</span></a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="AllMath.html" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="h3 font-weight-bold">Math</span>
+						</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="Integral.html">Integral</a>
+							<a class="dropdown-item" href="Fraction.html">Fraction</a>
+							<a class="dropdown-item" href="Sqrt.html">Sqrt</a>
+							<a class="dropdown-item" href="Lim.html">Lim</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="text-white collapse navbar-collapse" id="navbarSupportedContent1">
+				<address class="text-right text-white" style="margin-bottom: 0; margin-top: 5px;	">
+					<a href="../Task2/AboutMe.html"><span class="glyphicon glyphicon-info-sign mr-2"></span></a>
+					<strong>+7(****)307-715</strong> <br>
+					г. Москва, ул. Рочдельская, д. 14 <br>
+					Приём заказов c <strong>10:00</strong> до <strong>24:00</strong>
+				</address>
+			</div>
+		</nav>
 	</div>
 	
 	<div id="carousel" class="row justify-content-sm-center" style="margin: 0">
@@ -130,47 +154,11 @@
 					<a href="buy.html" class="btn btn-primary">Купить</a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-md-4 col-sm-6 p-1 card" style="padding: 4">
-				<img src="https://menuforme.online/files/92604/media/686022/standard_1024_686022_5dedeceacc9e5.jpg" 
-				class="card-img-top image-fluid" alt="Аляска">
-				<div class="card-body">
-					<h3 class="card-title">Аляска</h3>
-					<p class="card-text text-truncate">Рис суши, нори, нерка (х/к) <br> угорь жареный, икра "Тобико", сыр творожный, соус "Спайс".</p>
-					<a href="buy.html" class="btn btn-primary">Купить</a>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-4 col-sm-6 p-1 card" style="padding: 4">
-				<img src="https://menuforme.online/files/92604/media/686022/standard_1024_686022_5dedeceacc9e5.jpg" 
-				class="card-img-top image-fluid" alt="Аляска">
-				<div class="card-body">
-					<h3 class="card-title">Аляска</h3>
-					<p class="card-text text-truncate">Рис суши, нори, нерка (х/к) <br> угорь жареный, икра "Тобико", сыр творожный, соус "Спайс".</p>
-					<a href="buy.html" class="btn btn-primary">Купить</a>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-4 col-sm-6 p-1 card" style="padding: 4">
-				<img src="https://menuforme.online/files/92604/media/686022/standard_1024_686022_5dedeceacc9e5.jpg" 
-				class="card-img-top image-fluid" alt="Аляска">
-				<div class="card-body">
-					<h3 class="card-title">Аляска</h3>
-					<p class="card-text text-truncate">Рис суши, нори, нерка (х/к) <br> угорь жареный, икра "Тобико", сыр творожный, соус "Спайс".</p>
-					<a href="buy.html" class="btn btn-primary">Купить</a>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-4 col-sm-6 p-1 card" style="padding: 4">
-				<img src="https://menuforme.online/files/92604/media/686022/standard_1024_686022_5dedeceacc9e5.jpg" 
-				class="card-img-top image-fluid" alt="Аляска">
-				<div class="card-body">
-					<h3 class="card-title">Аляска</h3>
-					<p class="card-text text-truncate">Рис суши, нори, нерка (х/к) <br> угорь жареный, икра "Тобико", сыр творожный, соус "Спайс".</p>
-					<a href="buy.html" class="btn btn-primary">Купить</a>
-				</div>
-			</div>
 		</div>
 	</div>
 
 	<footer class="bg-dark text-white text-right p-3" style="height: 100px">
-		<a href="https://www.instagram.com/"><img src="https://lh3.googleusercontent.com/proxy/Nbump1HwPFt__J55VekWUqzb3wqoOi3fZRJhMvBqr287XoGVVTDHXp2nNhfdpQOUpMCzCmJQcy8x6Ctw3KBH4ZSduRp20DyefRG5kwC7xJNxsicjoZN05smRayrGETFWBZNruC8rhSVbxUjwDlF_" style="width: 50px; height: 50px" alt="Instagram"></a>
+		<a href="https://www.instagram.com/"><img src="http://icon-library.com/images/instagram-icon-png-white/instagram-icon-png-white-28.jpg" style="width: 50px; height: 50px" alt="Instagram"></a>
 		<a href="https://twitter.com/explore"><img src="http://icon-library.com/images/white-twitter-icon-png/white-twitter-icon-png-11.jpg" style="width: 50px; height: 50px" alt="Twitter"></a>
 		<h4 class="font-italic">&copy; Просин Андрей</h4>
 	</footer>
