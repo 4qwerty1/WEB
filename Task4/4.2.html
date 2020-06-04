@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>4.2</title>
+</head>
+<body onload="f()">
+	<div>
+		<strong> Найти сумму ряда: </strong>
+		<math style="font-size: xx-large;">
+			<mrow>
+				<mi>x</mi>
+
+				<mo>+</mo>
+				<mfrac>
+					<msup>
+						<mi>x</mi>
+						<mn>3</mn>
+					</msup>
+					<mn>3</mn>
+				</mfrac>
+				
+				<mo>+</mo>
+				<mfrac>
+					<msup>
+						<mi>x</mi>
+						<mn>5</mn>
+					</msup>
+					<mn>5</mn>
+				</mfrac>
+
+				<mo>+</mo>
+				<mfrac>
+					<msup>
+						<mi>x</mi>
+						<mn>7</mn>
+					</msup>
+					<mn>7</mn>
+				</mfrac>
+
+				<mi>...</mi>
+			</mrow>
+		</math>
+		<p id="ans">
+			ANS: 
+		</p>
+		<input type="button" value="Try again" onclick="f()">
+	</div>
+	
+	<script>
+		function f() {
+			var x = Number(window.prompt('Введите занчение |x| < 1: ', 0.1));
+
+			if (Math.abs(x) >= 1) {
+				alert('Erorr. |x| >= 1');
+				f();
+			}
+
+			var ans = 0;
+			while (Math.abs(x) * 1000 > 5) {
+				ans += x;
+				x *= x*x;
+			}
+			document.getElementById('ans').textContent = 'ANS = ' + ans;
+		}
+	</script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

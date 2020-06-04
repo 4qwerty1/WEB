@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>tmp</title>
+	<style>
+		span {
+			margin: 5px;
+		}
+	</style>
+</head>
+<body>
+	<h2>Матрица:</h2>
+	<input type="button" value="Create" onclick="checkedNumber()">
+	<input type="text" id="number">
+	<script>
+		function checkedNumber() {
+			var input = document.getElementById('number');
+			var number = input.value;
+			if (Number(number)) {
+				createMatrix(Number(number));
+			} else {
+				input.value = 'Неверное значение';
+			}
+		}
+		function getRandomInt(min, max) {
+			let rand = min + Math.random() * (max - 1 - min);
+			return Math.round(rand);
+		}
+		function getArray(n) {
+			let arr = []
+			for (let i = 0; i < n; i++) {
+				arr.push(getRandomInt(-50, 50));
+			}
+			return arr;
+		}
+		function getResultArray(a) {
+			a.sort((a, b) => a - b);
+			ans = [];
+			var size = Math.sqrt(a.length);
+			for (var i = 0; i < size; i++) {
+				ans.push([]);
+				for (var j = 0; j < size; j++) {
+					if (j % 2 == 0) {
+						ans[i].push(a[size * j + i]);
+					}
+					else {
+						ans[i].push(a[size * j + 3 - i]);
+					}
+				}
+			}
+			return ans;
+		}
+		function createMatrix(size) {
+			var arr = getResultArray(getArray(size * size));
+
+			var div = document.getElementById('matrix');
+			if (div) {
+				div.remove();
+			}
+			var div = document.createElement('div');
+			div.setAttribute('id', 'matrix');
+
+			for (var i = 0; i < size; i++) {
+				let p = document.createElement('p');
+				div.appendChild(p);
+				for (var j = 0; j < size; j++) {
+					let span = document.createElement('span');
+					span.setAttribute('margin', '')
+					span.innerHTML = arr[i][j];
+
+					p.appendChild(span);
+				}
+			}
+			document.body.append(div);
+		}
+	</script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

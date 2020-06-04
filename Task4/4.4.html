@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>4.4</title>
+</head>
+<body>
+	<h2>Матрица:</h2>
+	<!-- <input type="button" value="Create" onclick="createMatrix(4)"> -->
+	<script>
+		function getRandomInt(min, max) {
+			let rand = min + Math.random() * (max - 1 - min);
+			return Math.round(rand);
+		}
+		function getArray(n) {
+			let arr = []
+			for (let i = 0; i < n; i++) {
+				arr.push(getRandomInt(-50, 50));
+			}
+			return arr;
+		}
+		function getResultArray(a) {
+			a.sort((a, b) => a - b);
+			ans = [];
+			var size = Math.sqrt(a.length);
+			for (var i = 0; i < size; i++) {
+				ans.push([]);
+				for (var j = 0; j < size; j++) {
+					if (j % 2 == 0) {
+						ans[i].push(a[size * j + i]);
+					}
+					else {
+						ans[i].push(a[size * j + 3 - i]);
+					}
+				}
+			}
+			return ans;
+		}
+		var size = 4;
+		var arr = getResultArray(getArray(size * size));
+		var div = document.createElement('div');
+		div.setAttribute('id', 'matrix');
+
+		var math = document.createElement('math');
+		div.appendChild(math);
+
+		var mtable = document.createElement('mtable');
+		math.appendChild(mtable);
+
+		for (var i = 0; i < size; i++) {
+			let mtr = document.createElement('mtr');
+			mtable.appendChild(mtr);
+			for (var j = 0; j < size; j++) {
+				let mtd = document.createElement('mtd');
+				mtd.innerHTML = `<mn> ${arr[i][j]} </mn>`;
+
+				mtr.appendChild(mtd);
+			}
+		}
+		document.body.append(div);
+	</script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

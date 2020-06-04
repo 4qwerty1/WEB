@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DOM</title>
+</head>
+<body>
+	<input value="Нажми меня" onclick="alert('Клик!')" type="button">
+
+	<p>Нумерованный список</p>
+	<ol id="ordlist">
+		<li>First</li>
+		<li>Second</li>
+		<li>Third</li>
+	</ol>
+	<b>Document</b>
+	
+	<div id="ext">
+		<p><b id="int">Березовая</b> роща</p>
+	</div>
+
+	<p id="example" onclick="addText(' new text ')" style="border: black 1px solid">
+		Click me
+	</p>
+
+	<!-- РАБОТА С АТРИБУТАМИ -->
+	<script>
+		function createAtt()
+		{id=document.getElementById('heading'); id.createAttribute('align')}
+		function setAtt()
+		{id=document.getElementById('heading'); id.setAttribute('align','center')}
+		function getAtt()
+		{id=document.getElementById('heading'); alert(id.getAttribute('align'))}
+		function removeAtt()
+		{id=document.getElementById('heading'); id.removeAttribute('align')}
+	</script>
+	<body>
+		<p id=heading>Работа с атрибутом узла</p>
+		<button onclick=createAtt()>Создать атрибут</button>
+		<button onclick=setAtt()>Установить атрибут</button>
+		<button onclick=getAtt()>Получить атрибут</button>
+		<button onclick=removeAtt()>Удалить атрибут</button>
+	</body>
+
+
+	<!-- НАВИГАЦИЯ ПО ДЕРЕВУ -->
+	<script>
+		var oList = document.getElementById('ordlist');
+		console.log(oList.tagName);
+		console.log(oList.parentNode.tagName);
+
+		console.log(oList.children[1].tagName);
+		console.log(oList.firstElementChild.tagName)
+		console.log(oList.lastElementChild.tagName);
+		console.log(oList.previousElementSibling.tagName);
+		console.log(oList.nextElementSibling.tagName);
+	</script>
+
+
+	<!-- ДОБАВЛЕНИЕ УЗЛА -->
+	<script>
+		oList=document.getElementById('ordlist')
+		newItem=document.createElement('li')
+		newText=document.createTextNode('Четвертый')
+
+		newItem.appendChild(newText);
+		oList.appendChild(newItem);
+
+		curItem=oList.firstChild
+		oList.insertBefore(newItem,curItem)
+	</script>
+
+
+	<!-- ДОБАВЛЕНИЕ ТЕКСТА -->
+	<script>
+		function addText(text) {
+			mytext = document.createTextNode(text);
+			document.getElementById('example').appendChild(mytext);
+		}
+	</script>
+
+
+	<!-- УДАЛЕНИЕ ПОТОМКА -->
+<!-- 	<script>
+		oList=document.getElementById('ordlist')
+		oList.removeChild(oList.firstElementChild)
+	</script> -->
+
+
+	<!-- УДАЛЕНИЕ УЗЛА -->
+<!-- 	<script>
+		oList=document.getElementById('ordlist');
+		oList.remove(true); //false
+	</script> -->
+
+
+	<!-- ВСТАВКА ССЫЛКИ -->
+<!-- 	<script>
+		function addlink()
+		{
+			mylink=document.createElement('a')
+			mylink.setAttribute('href','http://math.isu.ru')
+			mylink.setAttribute('name','nstu')
+			text=document.createTextNode('Сайт ИГУ')
+			mylink.appendChild(text)
+			document.getElementById('firstlink').appendChild(mylink)
+		}
+	</script>
+	<p><a href=http://nsu.ru>Сайт ИГУ</a>
+		<p id=firstlink onclick="addlink()">Щелкните здесь, чтобы
+		вставить новую ссылку</p> -->
+
+
+		<!-- ИЗМЕНЕНИЕ ТИПА СПИСКА -->
+		<script>
+			function changelist() {
+				oldlistitems=mylist.innerHTML
+				newnode=document.createElement('ul')
+				mylist.replaceWith(newnode)
+				newnode.innerHTML=oldlistitems
+			}
+		</script>
+		<ol id=mylist>
+			<li>Пункт 1</li>
+			<li>Пункт 2</li>
+			<li>Пункт 3</li>
+		</ol>
+		<button onclick=changelist()>Изменить тип
+		списка</button>
+		
+		<!-- ЗАМЕНА ИЗОБРАЖЕНИЯ -->
+<!-- 		<img id="img" src="https://i.pinimg.com/474x/49/25/e5/4925e58bb1825bbc2ef86a842aed4afe.jpg" onClick="changeimg()">
+		Щелкните на картинку
+		<script>
+			tr=1;
+			function changeimg() {
+				elem=document.all('img')
+				if (tr==1) {
+					elem.outerHTML='<img id="img" src="https://i.pinimg.com/474x/49/25/e5/4925e58bb1825bbc2ef86a842aed4afe.jpg" onClick="changeimg()">'
+					tr=2
+				}
+				else {
+					elem.outerHTML="<img id='img' src='https://lh3.googleusercontent.com/proxy/M3DmWa7lR-fCl8y0nokAQt6Y_7wrbH97VQHzDaB6AMzfY2s75OOPgsvxiICw_YTNNV94KTigEDoZASc7LV6OB7cTs2RTRR6Hkvx4IHQ' onClick='changeimg()'>"
+					tr=1
+				}
+			}
+		</script>	 -->
+
+
+		<!-- ОТОБРАЖЕНИЕ И СКРЫТИЕ -->
+<!-- 		<p id="p1">Это первый абзац.</p><hr>
+		<p id="p2">Это первый абзац.</p><hr>
+		<p id="p3">Это первый абзац.</p>
+
+		<input type="button" onclick="document.getElementById('p2').style.visibility='hidden'">
+		<input type="button" onclick="document.getElementById('p2').style.visibility='visible'">
+		<input type="button" onclick="document.getElementById('p2').style.display='none'">
+		<input type="button" onclick="document.getElementById('p2').style.display='block'"> -->
+
+
+		<!-- ОБРАБОТКА СОБЫТИЙ -->
+		<input id="elem" type="button" value="Нажми меня"/>
+		<script>
+			function handler1() { alert('Спасибо!'); };
+			function handler2() { alert('Спасибо ещё раз!'); }
+			elem.onclick = function() { alert("Привет"); };
+			elem.addEventListener("click", handler1);
+			elem.addEventListener("click", handler2);
+		</script>
+	</body>
+	</html>

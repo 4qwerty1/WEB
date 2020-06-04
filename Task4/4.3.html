@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>4.3</title>
+</head>
+<body>
+	<div>
+		Матрица М состоит из 6 строк, 8 столбцов. <br>
+		<strong>Выяснить, сколько элементов в каждой строке превышают среднее арифметическое значение, определенное для этой строки. <br>
+		Из найденных величин составить массив Р</strong>.
+	</div>
+	<p>
+		Матрица: 
+	</p>
+	<math>
+		<mtable id="table">
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+			<mtr>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+				<mtd><mn>1</mn></mtd>
+			</mtr>
+		</mtable>
+	</math>	
+	<input type="button" value="Ответ" onclick="getAns()" style="margin-left: 20px">
+	<script>
+		var table = document.getElementById('table');
+		var Matrix = [];
+		for (let i = 0; i < 6; i++) {
+			let tr = table.children[i];
+			Matrix.push([]);
+			for (let j = 0; j < 8; j++) {
+				let x = Math.round(Math.random()*100);
+				tr.children[j].innerHTML = `<mn> ${x} </mn>`;
+				Matrix[i].push(x);
+			}
+		}
+		function getAns() {
+			var P = [];
+
+			for (let i = 0; i < 6; i++) {
+				let average = getAverage(i);
+				let count = 0;
+				for (let number of Matrix[i]) {
+					if (number > average) {
+						count++;
+					}
+				}
+				P.push(count);	
+			}
+			createList(P);
+
+		}
+		function getAverage(x) {
+			let sum = 0;
+			for (let number of Matrix[x]) {
+				sum += number;
+			}
+			return sum / 8;
+		}
+		function createList(P) {
+			var ol = document.getElementById('list');
+			if (ol) {
+				document.remove(ol);
+			}
+			var ol = document.createElement('ol');
+			ol.setAttribute('display', 'inline');
+			ol.setAttribute('id', 'list');
+			for (let i = 0; i < 6; i++) {
+				item = document.createElement('li');
+				text = document.createTextNode(`${P[i]}`);
+
+				item.appendChild(text);
+				ol.appendChild(item);
+			}
+			document.body.append(ol);
+		}
+	</script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

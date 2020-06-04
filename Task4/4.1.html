@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>4.1</title>
+</head>
+<body>
+	<div>
+		<h2>Площадь треугольника</h2>
+		<span>Введите длины сторон:</span>
+		<div id="numbers">
+			<input type="text" id="1" maxlength="10">
+			<input type="text" id="2" maxlength="10">
+			<input type="text" id="3" maxlength="10">
+		</div>
+		<input type="button" value="Подтвердить" onclick="getAns()">
+	</div>
+	<script>
+		function getAns() {
+			//test sides of triangle
+			sides = document.getElementById('numbers');
+			for (let i = 0; i < 3; i++) {
+				testNumber(numbers.childNodes[i * 2 + 1].id);
+				if (!numbers.childNodes[i * 2 + 1].value) {
+					return;
+				}
+			}
+			var a = Number(numbers.childNodes[1].value);
+			var b = Number(numbers.childNodes[3].value);
+			var c = Number(numbers.childNodes[5].value);
+
+			if (isTriangle(a, b, c)) {
+				var p = (a + b + c) / 2;
+				alert('S = ' + Math.sqrt(p * (p - a) * (p - b) * (p - c))); 
+			}
+		}
+		function testNumber(id) {
+			number = document.getElementById(id);
+
+			if (!Number(number.value)) {
+				alert('Неверное число под номером ' + number.id);
+				number.value = '';
+			} else {
+				number.value = Number(number.value);
+			}
+		}
+		function isTriangle(a, b, c) {
+			if (Math.max(a, b, c) > a + b + c - Math.max(a, b, c)) {
+				alert('this is no triangle');
+				allNull();
+				return false;
+			} else {
+				return true;
+			}
+		}
+		function allNull() {
+			for (let i = 0; i < 3; i++) {
+				document.getElementById('numbers').childNodes[i * 2 + 1].value = '';
+			}
+		}
+	</script>
+</body>
+</html>
