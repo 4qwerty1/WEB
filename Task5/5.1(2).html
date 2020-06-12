@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>5.1(2)</title>
+</head>
+<body onload="CreateList()">
+	<!-- hello everybody -->
+	<input type="button" value="GetInfromation" onclick="GetInfromation(document.children[0])">
+	<script>
+		var m = [
+		{
+			text: 'Животные', 
+			childs: [
+			{
+				text:'Млекопитающие', 
+				childs: ['Коровы', 'Ослы', 'Собаки', 'Тигры'],
+			},
+			{
+				text:'Другие', 
+				childs:['Змеи', 'Птицы', 'Ящерицы'],
+			},
+			]
+		},
+		{
+			text: 'Рыбы', 
+			childs: [
+			{
+				text:'Аквариумные', 
+				childs: ['Гуппи', 'Скалярии'],
+			},
+			{
+				text:'Морские', 
+				childs:['Морская форель'],
+			},
+			]
+		}
+		];
+		function CreateList() {
+			var topUl = document.createElement('ul');
+			for (let i of m) {
+				let topLi = document.createElement('li');
+				topUl.appendChild(topLi);
+
+				//Животные
+				topLi.appendChild(document.createTextNode(i.text));
+
+				let middleUl = document.createElement('ul');
+				topLi.appendChild(middleUl);
+				for (let j of i.childs) {
+					let middleLi = document.createElement('li');
+					middleUl.appendChild(middleLi);
+
+					//Млекопитающие
+					middleLi.appendChild(document.createTextNode(j.text));
+
+					let bottomUl = document.createElement('ul');
+					middleLi.appendChild(bottomUl);
+					for (let k of j.childs) {
+						let bottomLi = document.createElement('li');
+						bottomUl.appendChild(bottomLi);
+
+						//Коровы
+						bottomLi.appendChild(document.createTextNode(k));
+					}
+				}
+			}
+			document.body.append(topUl);
+		}
+		function GetInfromation(node) {
+			if (node.nodeType == 1) {
+				describeElem(node);
+
+				let i = (node.firstChild == null || node.firstChild.nodeType == 3) ? 1 : 0;
+				for (i; i < node.childNodes.length; i++) {
+					GetInfromation(node.childNodes[i]);
+				}
+			} else if (node.nodeType == 3) {
+				describeText(node);
+			} else {
+				describeComment(node);
+			}
+		}
+		function describeElem(elem) {
+			if (elem.firstChild == null || elem.firstChild.nodeType == 1) {
+				console.log(
+					`Type: Elem	` + '\n' +
+					`Name: ${elem.nodeName}` + '\n' +
+					`Text: ---`
+					);
+			} else {
+				console.log(
+					`Type: Elem	` + '\n' +
+					`Name: ${elem.nodeName}` + '\n' +
+					`Text: ${elem.firstChild.data.trim() == '' ? '---' : elem.firstChild.data.trim()}`
+					);
+			}
+		}
+		function describeText(text) {
+			if (text.data.trim() != '') {
+				console.log(
+					`Type: ${getNodeName(elem)}` + '\n' +
+					`Name: ${elem.nodeName}` + '\n' +
+					`Text: ${elem.data.trim()}`
+					);
+			}
+		}
+		function describeComment(comment) {
+			console.log(
+				`Type: ${getNodeName(comment)}` + '\n' +
+				`Name: ${comment.nodeName}` + '\n' +
+				`Text: ${comment.data.trim() == "" ? '---' : comment.data.trim()}`
+				);
+		}
+		function getNodeName(elem) {
+			return elem.nodeName[1].toUpperCase() + elem.nodeName.slice(2);
+		}
+	</script>
+</body>
+</html>
