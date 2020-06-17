@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>5.3</title>
+</head>
+<body>
+	<input type="button" value="getInfrom" onclick="getInform()">
+	<script src="jquery-3.5.1.min.js"></script>
+	<script>
+		var m = [
+		{
+			text: 'Животные', 
+			childs: [
+			{
+				text:'Млекопитающие', 
+				childs: ['Коровы', 'Ослы', 'Собаки', 'Тигры'],
+			},
+			{
+				text:'Другие', 
+				childs:['Змеи', 'Птицы', 'Ящерицы'],
+			},
+			]
+		},
+		{
+			text: 'Рыбы', 
+			childs: [
+			{
+				text:'Аквариумные', 
+				childs: ['Гуппи', 'Скалярии'],
+			},
+			{
+				text:'Морские', 
+				childs:['Морская форель'],
+			},
+			]
+		}
+		];
+		$(document).ready(function() {
+			var topUl = $('<ul id="list"></ul>');
+			for (let i of m) {
+				//Животные
+				let topLi = $(`<li>${i.text}</li>`);
+				topLi.appendTo(topUl);
+
+				let middleUp = $('<ul></ul>');
+				middleUp.appendTo(topLi);
+				for (let j of i.childs) {
+					//Млекопитающие
+					let middleLi = $(`<li>${j.text}</li>`);
+					middleLi.appendTo(middleUp);
+
+					let bottomUp = $('<ul></ul>');
+					bottomUp.appendTo(middleLi);
+					for (let k of j.childs) {
+						$(`<li>${k}</li>`).appendTo(bottomUp);
+					}
+				}
+			}
+			$(document.body).prepend(topUl);
+			topUl.wrap('<div id="container" style="height: 310px; width: 234px"></div>');
+
+
+			$('#container').bind('click', function() {
+				$('#list').fadeToggle();
+			});
+		});
+		function getInform() {
+			$("li").each(function(index, elem){
+				console.log(`Text: ${elem.childNodes[0].data}` + '\n' +
+					`Inside: ${NestedElem(elem)}`);
+			});
+		}
+		function NestedElem(elem) {
+			if (elem.children.length == 0)
+				return 0;
+
+			let a = $(elem).children('li').length;
+			let b = 0
+			$(elem).children().each(function(index, elem) {
+				b += NestedElem(elem);
+			});
+
+			return a + b;
+		}
+
+	</script>
+</body>
+</html>
