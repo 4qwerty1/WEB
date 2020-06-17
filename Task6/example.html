@@ -1,0 +1,268 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas & Mootools</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mootools/1.6.0/mootools-core.js"></script>
+	<script type="text/javascript">
+		var canvas, ctx, figures, idTimer, allOrientation = 'up';
+		Figure = new Class ({
+			orientation: 'up',
+			posX: 0,
+			posY: 0,
+			colFigure:"rgb(0,0,0)",
+
+			initialize: function(pX, pY) {
+				this.posX = pX;
+				this.posY = pY;
+				this.colFigure = 'rgb('+Math.floor(Math.random()*256)+','
+				+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+				
+				if (allOrientation == 'random') {
+					let x = Math.floor(Math.random() * 4);
+					switch (x) {
+						case 0:
+						this.orientation = 'up';
+						break;
+						case 1:
+						this.orientation = 'right';
+						break;
+						case 2:
+						this.orientation = 'down';
+						break;
+						case 3:
+						this.orientation = 'left';
+						break;
+					}
+				} else {
+					this.orientation = allOrientation;
+				}
+			},
+			colorFigure: function(ctx) {
+				with (this) {
+					return 'black';
+				}
+			},
+			move: function() {
+				with (this) {
+					switch (this.orientation) {
+						case 'up':
+						moveUp(this);
+						break;
+						case 'down':
+						moveDown(this);
+						break;
+						case 'right':
+						moveRight(this);
+						break;
+						case 'left':
+						moveLeft(this);
+						break;
+						default:
+						moveChaos(this);
+					}
+				}
+			}, 
+			boost: function() {}, //TODO
+			draw: function(ctx) {},
+		});
+		Ball = new Class ({
+			Extends: Figure,
+			rBall: 0,
+			initialize: function(pX, pY) {
+				this.parent(pX, pY);
+				this.rBall = 5+Math.random()*25;
+			},
+			colorFigure: function(ctx) {
+				with (this) {
+					var gradient = ctx.createRadialGradient(posX+rBall/4,  
+						posY-rBall/6, rBall/8, posX, posY, rBall);
+					gradient.addColorStop(0, '#fff');
+					gradient.addColorStop(0.85, colFigure);
+					return gradient;
+				}
+			},
+			draw : function(ctx) {
+				with (this) {
+					ctx.fillStyle = colorFigure(ctx);
+					ctx.beginPath();
+					ctx.arc(posX, posY, rBall, 0, 2*Math.PI, false);
+					ctx.closePath();
+					ctx.fill();
+				}
+			},
+		});
+		Rect = new Class({
+			Extends: Figure,
+			w: 0,
+			h: 0,
+			initialize: function(pX, pY) {
+				this.w = 10+Math.random()*60;
+				this.h = 10+Math.random()*60;
+				this.parent(pX, pY);
+			},
+			colorFigure: function(ctx) {
+				with (this) {
+					var gradient = ctx.createLinearGradient(posX-w/2, posY-h/2, posX+w/2, posY+h/2);
+					gradient.addColorStop(1, colFigure);
+					gradient.addColorStop(0, '#fff');
+					return gradient;
+				}
+			},
+			draw: function(ctx) {
+				with (this) {
+					ctx.fillStyle = colorFigure(ctx);
+					ctx.beginPath();
+					ctx.fillRect(posX-w/2, posY-h/2, w, h);
+					ctx.closePath();
+				}
+			}
+		});
+		Star = new Class({});
+		Triangle = new Class({});
+
+
+		function drawBack(ctx,col1,col2,w,h) {
+			// закрашиваем канвас градиентным фоном
+			ctx.save(); //Сохраняет текущее состояние стилей рисования, используя для этого стек
+			var g = ctx.createLinearGradient(0,0,0,h); //Создает линейный градиент вдоль линии, задаваемой координатами
+			g.addColorStop(1,col1); //опорные точки определяющие цвет //col1 - цвет, 0 - начало градиента, 1 - конец
+			g.addColorStop(0,col2);
+			ctx.fillStyle = g;
+			ctx.fillRect(0,0,w,h);
+			ctx.restore();
+		}
+		// инициализация работы
+		function init(){
+			canvas = document.getElementById('canvas');
+			if (canvas.getContext){
+				ctx = canvas.getContext('2d'); //ctx - контекст
+				//рисуем фон
+				drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
+				//создаем 10 шариков, заноси их в массив и выводим на canvas
+				figures = [];
+				for (var i = 1; i<=10;i++){
+					var item = new Ball(10+Math.random()*(canvas.width-30),
+						10+Math.random()*(canvas.height-30));
+					item.draw(ctx);
+					figures.push(item);
+				}
+			}
+		}
+		// создаем новый шарик по щелчку мыши, добавляем его в массив шариков и рисуем его
+		function goInput(event){
+			var x = event.clientX;
+			var y = event.clientY;
+			var item = new Rect(x,y);
+			item.draw(ctx);
+			figures.push(item);
+		}
+		function moveFigure(){
+			//реализация движения шариков, находящихся в массиве figures
+			drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
+			for (var i = 0; i < figures.length;i){
+				// figures[i].posX = figures[i].posX + (Math.random()*4-2);
+				// figures[i].posY = figures[i].posY + (Math.random()*2-4);
+				figures[i].move();
+				figures[i].draw(ctx);
+				if ((figures[i].posX > canvas.width)||(figures[i].posX < 0)||(figures[i].posY < 0)) 
+					figures.splice(i,1);
+				else 
+					i++;
+			}
+		}
+
+		//функции движения
+		function changeDirection(direction) {
+			allOrientation = direction;
+			for (let i of figures) {
+				i.orientation = direction;
+			}
+		}
+		function allRandom() {
+			allOrientation = 'random';
+			for (let i of figures) {
+				let x = Math.floor(Math.random() * 4);
+				switch (x) {
+					case 0:
+					i.orientation = 'up';
+					break;
+					case 1:
+					i.orientation = 'right';
+					break;
+					case 2:
+					i.orientation = 'down';
+					break;
+					case 3:
+					i.orientation = 'left';
+					break;
+				}
+			}
+		}
+		function allChaos() {
+			allOrientation = 'chaos';
+			for (let i of figures) {
+				i.orientation = 'chaos';
+			}
+		}
+		function moveUp(figure) {
+			figure.posX = figure.posX + (Math.random()*4-2);
+			figure.posY = figure.posY + (Math.random()*2-4);
+		}
+		function moveDown(figure) {
+			figure.posX = figure.posX + (Math.random()*4-2);
+			figure.posY = figure.posY + (-Math.random()*2+4);
+		}
+		function moveRight(figure) {
+			figure.posX = figure.posX + (-Math.random()*2+4);
+			figure.posY = figure.posY + (Math.random()*4-2);
+		}
+		function moveLeft(figure) {
+			figure.posX = figure.posX + (Math.random()*2-4);
+			figure.posY = figure.posY + (Math.random()*4-2);
+		}
+		function moveChaos(figure) {
+			let x = Math.floor(Math.random() * 4);
+			switch (x) {
+				case 0:
+				moveUp(figure);
+				break;
+				case 1:
+				moveDown(figure);
+				break;
+				case 2:
+				moveRight(figure);
+				break;
+				case 3:
+				moveLeft(figure);
+				break;
+			}
+		}
+
+
+		function isCross(figure) {}
+		function startMove(){
+			clearInterval(idTimer);
+			idTimer = setInterval('moveFigure();',50);
+		}
+		
+		
+	</script>
+	<style type="text/css">
+		canvas { border: 1px solid blue; }
+	</style>
+</head>
+<body onload="init();">
+	<canvas id="canvas" width="600" height="400" onclick="goInput(event);">
+	</canvas>
+	<form>
+		<input type = "button" value = "Движение" onclick="startMove()">
+		<input type = "button" value = "Стоп" onclick="clearInterval(idTimer);"> <br> <br>
+		<input type="button" value="Вверх" onclick="changeDirection('up');">
+		<input type="button" value="Вниз" onclick="changeDirection('down');">
+		<input type="button" value="Влево" onclick="changeDirection('left');">
+		<input type="button" value="Вправо" onclick="changeDirection('right');">
+		<input type="button" value="Рандом" onclick="allRandom();">
+		<input type="button" value="Хаос" onclick="allChaos();">
+	</form>
+</body>
+</html>

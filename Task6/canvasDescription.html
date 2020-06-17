@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>test</title>
+	<script type="text/javascript">
+		function draw() {
+			var canvas = document.getElementById('tutorial');
+			if (canvas.getContext) {
+				var ctx = canvas.getContext('2d');
+
+				//рисование прямоугольника
+				ctx.fillRect(25, 25, 100, 100); //заполненный прямоугольник
+				ctx.clearRect(45, 45, 60, 60); //рисует границы прямоугольника
+				ctx.strokeRect(50, 50, 50, 50); //очищает заданную область и делает ее полностью прозрачной
+
+				//рисование треугольника
+				ctx.beginPath();
+				ctx.moveTo(175, 150); //перенесения карандаша на координаты начальной точки (изначально: 0, 0) в x, y
+				ctx.lineTo(200, 175);  //рисует линию, принимает координаты конечной линни
+				ctx.lineTo(200, 125);
+				ctx.fill();
+
+				//рисование дуги, круга
+				ctx.beginPath();
+				ctx.arc(300, 300, 50, 0, Math.PI, false);
+				ctx.fill();
+
+				
+
+			}
+		}
+	</script>
+	<style type="text/css">
+		canvas {
+			border: 1px solid black;
+		}
+	</style>
+</head>
+<body onload="draw();">
+	<canvas id="tutorial" width="500" height="500"></canvas>
+</body>
+</html>
