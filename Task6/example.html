@@ -6,10 +6,11 @@
 	<script type="text/javascript">
 		var canvas, ctx, figures, idTimer, allOrientation = 'up';
 		Figure = new Class ({
-			orientation: 'up',
 			posX: 0,
 			posY: 0,
 			colFigure:"rgb(0,0,0)",
+			orientation: 'up',
+			multiplier: 1,
 
 			initialize: function(pX, pY) {
 				this.posX = pX;
@@ -44,25 +45,37 @@
 			},
 			move: function() {
 				with (this) {
+					let buff;
 					switch (this.orientation) {
 						case 'up':
-						moveUp(this);
-						break;
+							buff = this.posY;
+							moveUp(this);
+							this.boost(buff - this.posY);
+							break;
 						case 'down':
-						moveDown(this);
-						break;
+							buff = this.posY;
+							moveDown(this);
+							this.boost(this.posY - buff);
+							break;
 						case 'right':
-						moveRight(this);
-						break;
+							buff = this.posX;
+							moveRight(this);
+							this.boost(this.posX - buff);
+							break;
 						case 'left':
-						moveLeft(this);
-						break;
+							buff = this.posX;
+							moveLeft(this);
+							this.boost(buff - this.posX);
+							break;
 						default:
-						moveChaos(this);
+							let buffX = this.posX, buffY = this.posY;
+							moveChaos(this);
+							this.boost(Math.max(this.posX - buffX, buffX - this.posX,
+								this.posY - buffY, buffY - this.posY));
 					}
 				}
 			}, 
-			boost: function() {}, //TODO
+			boost: function(n) {}, //TODO
 			draw: function(ctx) {},
 		});
 		Ball = new Class ({
@@ -90,6 +103,9 @@
 					ctx.fill();
 				}
 			},
+			boost: function(n) {
+				this.rBall += n / 16;
+			}
 		});
 		Rect = new Class({
 			Extends: Figure,
@@ -115,6 +131,10 @@
 					ctx.fillRect(posX-w/2, posY-h/2, w, h);
 					ctx.closePath();
 				}
+			},
+			boost: function(n) {
+				this.w += n / 8;
+				this.h += n / 8;
 			}
 		});
 		Star = new Class({});
