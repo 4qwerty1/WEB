@@ -5,12 +5,14 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mootools/1.6.0/mootools-core.js"></script>
 	<script type="text/javascript">
 		var canvas, ctx, figures, idTimer, allOrientation = 'up';
+		var minSpeed = 4, maxSpeed = 20;
 		Figure = new Class ({
+			name: 'figure',
 			posX: 0,
 			posY: 0,
 			colFigure:"rgb(0,0,0)",
 			orientation: 'up',
-			multiplier: 1,
+			speed: 4,
 
 			initialize: function(pX, pY) {
 				this.posX = pX;
@@ -45,41 +47,32 @@
 			},
 			move: function() {
 				with (this) {
-					let buff;
 					switch (this.orientation) {
 						case 'up':
-							buff = this.posY;
-							moveUp(this);
-							this.boost(buff - this.posY);
-							break;
+						moveUp(this);
+						break;
 						case 'down':
-							buff = this.posY;
-							moveDown(this);
-							this.boost(this.posY - buff);
-							break;
+						moveDown(this);
+						break;
 						case 'right':
-							buff = this.posX;
-							moveRight(this);
-							this.boost(this.posX - buff);
-							break;
+						moveRight(this);
+						break;
 						case 'left':
-							buff = this.posX;
-							moveLeft(this);
-							this.boost(buff - this.posX);
-							break;
+						moveLeft(this);
+						break;
 						default:
-							let buffX = this.posX, buffY = this.posY;
-							moveChaos(this);
-							this.boost(Math.max(this.posX - buffX, buffX - this.posX,
-								this.posY - buffY, buffY - this.posY));
+						moveChaos(this);
 					}
+					this.boost(3);
+					this.speed = Math.min(maxSpeed, this.speed + 0.15);
 				}
 			}, 
-			boost: function(n) {}, //TODO
+			boost: function(n) {},
 			draw: function(ctx) {},
 		});
 		Ball = new Class ({
 			Extends: Figure,
+			name: 'ball',
 			rBall: 0,
 			initialize: function(pX, pY) {
 				this.parent(pX, pY);
@@ -109,6 +102,7 @@
 		});
 		Rect = new Class({
 			Extends: Figure,
+			name: 'rect',
 			w: 0,
 			h: 0,
 			initialize: function(pX, pY) {
@@ -137,8 +131,6 @@
 				this.h += n / 8;
 			}
 		});
-		Star = new Class({});
-		Triangle = new Class({});
 
 
 		function drawBack(ctx,col1,col2,w,h) {
@@ -160,7 +152,7 @@
 				drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
 				//создаем 10 шариков, заноси их в массив и выводим на canvas
 				figures = [];
-				for (var i = 1; i<=10;i++){
+				for (var i = 1; i<=1;i++) {
 					var item = new Ball(10+Math.random()*(canvas.width-30),
 						10+Math.random()*(canvas.height-30));
 					item.draw(ctx);
@@ -170,21 +162,21 @@
 		}
 		// создаем новый шарик по щелчку мыши, добавляем его в массив шариков и рисуем его
 		function goInput(event){
-			var x = event.clientX;
-			var y = event.clientY;
+			var elem = document.getElementById('canvas').getBoundingClientRect(); //координаты canvas, отностително окна
+
+			var x = event.clientX - elem.x;
+			var y = event.clientY - elem.y;
 			var item = new Rect(x,y);
 			item.draw(ctx);
 			figures.push(item);
 		}
-		function moveFigure(){
+		function moveFigures(){
 			//реализация движения шариков, находящихся в массиве figures
 			drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
-			for (var i = 0; i < figures.length;i){
-				// figures[i].posX = figures[i].posX + (Math.random()*4-2);
-				// figures[i].posY = figures[i].posY + (Math.random()*2-4);
+			for (var i = 0; i < figures.length;i) {
 				figures[i].move();
 				figures[i].draw(ctx);
-				if ((figures[i].posX > canvas.width)||(figures[i].posX < 0)||(figures[i].posY < 0)) 
+				if ((figures[i].posX > canvas.width)||(figures[i].posX < 0)||(figures[i].posY < 0)||isCrossed(figures[i])||isBig(figures[i])) 
 					figures.splice(i,1);
 				else 
 					i++;
@@ -196,11 +188,13 @@
 			allOrientation = direction;
 			for (let i of figures) {
 				i.orientation = direction;
+				i.speed = minSpeed;
 			}
 		}
 		function allRandom() {
 			allOrientation = 'random';
 			for (let i of figures) {
+				i.speed = minSpeed;
 				let x = Math.floor(Math.random() * 4);
 				switch (x) {
 					case 0:
@@ -222,22 +216,23 @@
 			allOrientation = 'chaos';
 			for (let i of figures) {
 				i.orientation = 'chaos';
+				i.speed = minSpeed;
 			}
 		}
 		function moveUp(figure) {
 			figure.posX = figure.posX + (Math.random()*4-2);
-			figure.posY = figure.posY + (Math.random()*2-4);
+			figure.posY = figure.posY + (Math.random()*2-figure.speed);
 		}
 		function moveDown(figure) {
 			figure.posX = figure.posX + (Math.random()*4-2);
-			figure.posY = figure.posY + (-Math.random()*2+4);
+			figure.posY = figure.posY + (-Math.random()*2+figure.speed);
 		}
 		function moveRight(figure) {
-			figure.posX = figure.posX + (-Math.random()*2+4);
+			figure.posX = figure.posX + (-Math.random()*2+figure.speed);
 			figure.posY = figure.posY + (Math.random()*4-2);
 		}
 		function moveLeft(figure) {
-			figure.posX = figure.posX + (Math.random()*2-4);
+			figure.posX = figure.posX + (Math.random()*2-figure.speed);
 			figure.posY = figure.posY + (Math.random()*4-2);
 		}
 		function moveChaos(figure) {
@@ -259,13 +254,140 @@
 		}
 
 
-		function isCross(figure) {}
-		function startMove(){
-			clearInterval(idTimer);
-			idTimer = setInterval('moveFigure();',50);
+		function isCrossed(figure) {
+			for (let i of figures) {
+				//ball && ball
+				if (figure.name == 'ball' && i.name == "ball" && figure != i) {
+					let s = Math.sqrt(Math.pow(i.posX - figure.posX, 2) + Math.pow(i.posY - figure.posY, 2));
+					if (s < figure.rBall + i.rBall) {
+						return true;
+					}
+
+					//rect && rect (line && line)
+				} else if (figure.name == 'rect' && i.name == 'rect' && figure != i) {
+					let linesI = getLines(i);
+					let linesFigure = getLines(figure);
+
+					for (let j = 0; j < linesFigure.length / 2; j++) {
+						for (let k = 0; k < linesI.length / 2; k++) {
+							if (isLineCrossed(linesFigure[j*2], linesFigure[j*2+1], linesI[k*2], linesI[k*2+1]))
+								return true;
+						}
+					}
+
+					if (isInside(figure, i))
+						return true;
+				}
+			}
+			return false;
 		}
-		
-		
+		//передаем координаты отрезков ввиде объектов с свойствами x, y
+		function isLineCrossed(a, b, c, d) {
+			function area(X, Y, Z) {
+				return (Y.x - X.x) * (Z.y - X.y) - (Y.y - X.y) * (Z.x - X.x);
+			}
+			function onLine(x1, x2, x3, x4) {
+				if (x1 > x2) {
+					let t = x1;
+					x1 = x2;
+					x2 = t;
+				}
+				if (x3 > x4) {
+					let t = x3;
+					x3 = x4;
+					x4 = t;
+				}
+				return Math.max(x1, x3) <= Math.min(x2, x4);
+			}
+
+			return onLine(a.x, b.x, c.x, d.x) && onLine(a.y, b.y, c.y, d.y) && (area(a,b,c) * area(a,b,d) <= 0) && (area(c,d,a) * area(c,d,b) <= 0);
+		}
+		//возвращает массив линий объекта, линий - отрезок, обозначаемый 2-мя точками, с координатами x, y
+		function getLines(figure) {
+			let lines = [];
+			if (figure.name == 'rect') {
+				let a = {
+					x: figure.posX - figure.w / 2,
+					y: figure.posY - figure.h / 2,
+				};
+				let b = {
+					x: figure.posX + figure.w / 2,
+					y: figure.posY - figure.h / 2,
+				};
+				let c = {
+					x: figure.posX + figure.w / 2,
+					y: figure.posY + figure.h / 2,
+				};
+				let d = {
+					x: figure.posX - figure.w / 2,
+					y: figure.posY + figure.h / 2,
+				}
+
+				lines.push(a);
+				lines.push(b);
+
+				lines.push(b);
+				lines.push(c);
+
+				lines.push(c);
+				lines.push(d);
+
+				lines.push(d);
+				lines.push(a);
+			}
+
+			return lines;
+		}
+		function isInside(f1, f2) {
+			//f2 внутри f1
+			if (f1.w > f2.w && f1.h > f2.h) {
+				//преверяем a.x
+				if (f1.posX - f1.w / 2 > f2.posX - f2.w / 2)
+					return false;
+				//преверяем a.y
+				if (f1.posY - f1.h / 2 > f2.posY - f2.h / 2)
+					return false;
+				//преверяем c.x
+				if (f1.posX + f1.w / 2 < f2.posX + f2.w / 2)
+					return false;
+				//преверяем c.y
+				if (f1.posY + f1.h / 2 < f2.posY + f2.h / 2)
+					return false;
+				return true;
+			}
+			//f1 внутри f2
+			if (f1.w < f2.w && f1.h < f2.h) {
+				//преверяем a.x
+				if (f1.posX - f1.w / 2 < f2.posX - f2.w / 2)
+					return false;
+				//преверяем a.y
+				if (f1.posY - f1.h / 2 < f2.posY - f2.h / 2)
+					return false;
+				//преверяем c.x
+				if (f1.posX + f1.w / 2 > f2.posX + f2.w / 2)
+					return false;
+				//преверяем c.y
+				if (f1.posY + f1.h / 2 > f2.posY + f2.h / 2)
+					return false;
+				return true;
+			}
+			return false;
+		}
+		function isBig(figure) {
+			if (figure.name == 'ball') {
+				return figure.rBall >= 55;
+			}
+			if (figure.name == 'rect') {
+				return figure.w >= 110 || figure.h >= 110;
+			}
+			return false; //во избежание ошибок
+		}
+
+
+		function startMove() {
+			clearInterval(idTimer);
+			idTimer = setInterval('moveFigures();',50);
+		}
 	</script>
 	<style type="text/css">
 		canvas { border: 1px solid blue; }
