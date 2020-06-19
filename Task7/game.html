@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Game</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mootools/1.6.0/mootools-core.js"></script>
+	<script type="text/javascript" src="mainJs.js"></script>
+	<style>
+		div {
+			margin-left: 20px;
+		}
+	</style>
+</head>
+<body onload="init();">
+	<div>
+		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"></canvas>
+		<form>
+			<form>
+				<input type="button" value="Start">
+				<input type="button" value="Finish">
+			</form>
+		</form>
+	</div>
+</body>
+</html>
