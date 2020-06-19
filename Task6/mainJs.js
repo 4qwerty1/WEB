@@ -2,20 +2,19 @@ var canvas, ctx, figures, idTimer, allOrientation = 'up';
 var minSpeed = 4, maxSpeed = 20;
 Figure = new Class ({
 	name: 'figure',
-	posX: 0,
-	posY: 0,
+	X: 0,
+	Y: 0,
 	colFigure:"rgb(0,0,0)",
 	orientation: 'up',
 	speed: 4,
 
 	initialize: function(pX, pY) {
-		this.posX = pX;
-		this.posY = pY;
-		this.colFigure = 'rgb('+Math.floor(Math.random()*256)+','
-		+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+		this.X = pX;
+		this.Y = pY;
+		this.colFigure = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
 
 		if (allOrientation == 'random') {
-			let x = Math.floor(Math.random() * 4);
+			var x = Math.floor(Math.random() * 4);
 			switch (x) {
 				case 0:
 				this.orientation = 'up';
@@ -34,64 +33,53 @@ Figure = new Class ({
 			this.orientation = allOrientation;
 		}
 	},
-	colorFigure: function(ctx) {
-		with (this) {
-			return 'black';
-		}
-	},
 	move: function() {
-		with (this) {
-			switch (this.orientation) {
-				case 'up':
-				moveUp(this);
-				break;
-				case 'down':
-				moveDown(this);
-				break;
-				case 'right':
-				moveRight(this);
-				break;
-				case 'left':
-				moveLeft(this);
-				break;
-				default:
-				moveChaos(this);
-			}
-			this.boost(3);
-			this.speed = Math.min(maxSpeed, this.speed + 0.15);
+		switch (this.orientation) {
+			case 'up':
+			moveUp(this);
+			break;
+			case 'down':
+			moveDown(this);
+			break;
+			case 'right':
+			moveRight(this);
+			break;
+			case 'left':
+			moveLeft(this);
+			break;
+			default:
+			moveChaos(this);
 		}
-	}, 
+		this.boost(3);
+		this.speed = Math.min(maxSpeed, this.speed + 0.15);
+	},
 	boost: function(n) {},
 	draw: function(ctx) {},
 });
 Ball = new Class ({
 	Extends: Figure,
-	name: 'ball',
-	rBall: 0,
+	name: 'circle',
+	radius: 0,
 	initialize: function(pX, pY) {
 		this.parent(pX, pY);
-		this.rBall = 5+Math.random()*25;
+		this.radius = 5+Math.random()*25;
 	},
 	colorFigure: function(ctx) {
-		with (this) {
-			var gradient = ctx.createRadialGradient(posX+rBall/4,  
-				posY-rBall/6, rBall/8, posX, posY, rBall);
-			gradient.addColorStop(0, '#fff');
-			gradient.addColorStop(0.85, colFigure);
-			return gradient;
-		}
+		var gradient = ctx.createRadialGradient(this.X+this.radius/4, this.Y-this.radius/6, this.radius/8, 
+			this.X, this.Y, this.radius);
+		gradient.addColorStop(0, '#fff');
+		gradient.addColorStop(0.85, this.colFigure);
+		return gradient;
 	},
 	draw : function(ctx) {
-		with (this) {
-			ctx.fillStyle = colorFigure(ctx);
-			ctx.beginPath();
-			ctx.arc(posX, posY, rBall, 0, 2*Math.PI, false);
-			ctx.closePath();
-			ctx.fill();
-		}
+		ctx.fillStyle = this.colorFigure(ctx);
+		ctx.beginPath();
+		ctx.arc(this.X, this.Y, this.radius, 0, 2*Math.PI, false);
+		ctx.closePath();
+		ctx.fill();
 	},
 	boost: function(n) {
-		this.rBall += n / 16;
+		this.radius += n / 16;
 	}
 });
 Rect = new Class({
@@ -102,28 +90,64 @@ Rect = new Class({
 	initialize: function(pX, pY) {
 		this.w = 10+Math.random()*60;
 		this.h = 10+Math.random()*60;
-		this.parent(pX, pY);
+		this.parent(pX - this.w/2, pY - this.h/2);
 	},
 	colorFigure: function(ctx) {
-		with (this) {
-			var gradient = ctx.createLinearGradient(posX-w/2, posY-h/2, posX+w/2, posY+h/2);
-			gradient.addColorStop(1, colFigure);
-			gradient.addColorStop(0, '#fff');
-			return gradient;
-		}
+		var gradient = ctx.createLinearGradient(this.X, this.Y, this.X + this.w, this.Y + this.h);
+		gradient.addColorStop(1, this.colFigure);
+		gradient.addColorStop(0, '#fff');
+		return gradient;
 	},
 	draw: function(ctx) {
-		with (this) {
-			ctx.fillStyle = colorFigure(ctx);
-			ctx.beginPath();
-			ctx.fillRect(posX-w/2, posY-h/2, w, h);
-			ctx.closePath();
-		}
+		ctx.fillStyle = this.colorFigure(ctx);
+		ctx.beginPath();
+		ctx.fillRect(this.X, this.Y, this.w, this.h); 
+		ctx.closePath();
 	},
 	boost: function(n) {
 		this.w += n / 8;
 		this.h += n / 8;
 	}
+});
+Star = new Class({
+	Extends: Ball,
+	tops: 4,
+	initialize: function(pX, pY) {
+		this.tops = Math.floor(Math.random()*5) + 4;
+		this.parent(pX, pY);
+	},
+	colorFigure: function(ctx) {
+		var gradient = ctx.createRadialGradient(this.X, this.Y, this.radius/9, this.X, this.Y, this.radius);
+		gradient.addColorStop(0, '#fff');
+		gradient.addColorStop(1, this.colFigure);
+		return gradient;
+	},
+	draw: function(ctx) {
+		ctx.fillStyle = this.colorFigure(ctx);
+
+		var rot = Math.PI / 2 * 3;
+
+		var x = this.X;
+		var y = this.Y;
+		var step = Math.PI / this.tops;
+
+		ctx.beginPath();
+		ctx.moveTo(this.X, this.Y - this.radius);
+		for (let i = 0; i < this.tops; i++) {
+			x = this.X + Math.cos(rot) * this.radius;
+			y = this.Y + Math.sin(rot) * this.radius;
+			ctx.lineTo(x, y);
+			rot += step;
+
+			x = this.X + Math.cos(rot) * this.radius / 2;
+			y = this.Y + Math.sin(rot) * this.radius / 2;
+			ctx.lineTo(x, y);
+			rot += step;
+		}
+		ctx.lineTo(this.X, this.Y - this.radius);
+		ctx.closePath();
+		ctx.fill();
+	},
 });
 
 
@@ -147,7 +171,19 @@ function init() {
 		//создаем 10 шариков, заноси их в массив и выводим на canvas
 		figures = [];
 		for (var i = 1; i<=10;i++) {
-			var item = new Ball(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+			// var item = new Rect(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+			var item;
+			switch (Math.floor(Math.random() * 3)) {
+				case (0):
+				item = new Ball(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+				break;
+				case (1):
+				item = new Rect(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+				break;
+				case (2):
+				item = new Star(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+				break;
+			}
 			item.draw(ctx);
 			figures.push(item);
 		}
@@ -155,11 +191,23 @@ function init() {
 }
 // создаем новый шарик по щелчку мыши, добавляем его в массив шариков и рисуем его
 function goInput(event) {
-	var elem = document.getElementById('canvas').getBoundingClientRect(); //координаты canvas, отностително окна
+	var elem = canvas.getBoundingClientRect(); //координаты canvas, отностително окна
 
 	var x = event.clientX - elem.x;
 	var y = event.clientY - elem.y;
-	var item = new Ball(x,y);
+	// var item = new Ball(x,y);
+	var item;
+	switch (Math.floor(Math.random() * 3)) {
+		case (0):
+		item = new Ball(x, y);
+		break;
+		case (1):
+		item = new Rect(x, y);
+		break;
+		case (2):
+		item = new Star(x, y);
+		break;
+	}
 	item.draw(ctx);
 	figures.push(item);
 }
@@ -169,7 +217,7 @@ function moveFigures() {
 	for (var i = 0; i < figures.length;i) {
 		figures[i].move();
 		figures[i].draw(ctx);
-		if ((figures[i].posX > canvas.width)||(figures[i].posX < 0)||(figures[i].posY < 0)||isCrossed(figures[i])||isBig(figures[i])) 
+		if (isAbroad(figures[i]) || isCrossed(figures[i]) || isBig(figures[i])) 
 			figures.splice(i,1);
 		else 
 			i++;
@@ -213,20 +261,20 @@ function allChaos() {
 	}
 }
 function moveUp(figure) {
-	figure.posX = figure.posX + (Math.random()*4-2);
-	figure.posY = figure.posY + (Math.random()*2-figure.speed);
+	figure.X = figure.X + (Math.random()*4-2);
+	figure.Y = figure.Y + (Math.random()*2-figure.speed);
 }
 function moveDown(figure) {
-	figure.posX = figure.posX + (Math.random()*4-2);
-	figure.posY = figure.posY + (-Math.random()*2+figure.speed);
+	figure.X = figure.X + (Math.random()*4-2);
+	figure.Y = figure.Y + (-Math.random()*2+figure.speed);
 }
 function moveRight(figure) {
-	figure.posX = figure.posX + (-Math.random()*2+figure.speed);
-	figure.posY = figure.posY + (Math.random()*4-2);
+	figure.X = figure.X + (-Math.random()*2+figure.speed);
+	figure.Y = figure.Y + (Math.random()*4-2);
 }
 function moveLeft(figure) {
-	figure.posX = figure.posX + (Math.random()*2-figure.speed);
-	figure.posY = figure.posY + (Math.random()*4-2);
+	figure.X = figure.X + (Math.random()*2-figure.speed);
+	figure.Y = figure.Y + (Math.random()*4-2);
 }
 function moveChaos(figure) {
 	let x = Math.floor(Math.random() * 4);
@@ -251,9 +299,9 @@ function moveChaos(figure) {
 function isCrossed(figure) {
 	for (let i of figures) {
 		//ball && ball
-		if (figure.name == 'ball' && i.name == "ball" && figure != i) {
-			let s = Math.sqrt(Math.pow(i.posX - figure.posX, 2) + Math.pow(i.posY - figure.posY, 2));
-			if (s < figure.rBall + i.rBall) {
+		if (figure.name == 'circle' && i.name == "circle" && figure != i) {
+			let s = Math.sqrt(Math.pow(i.X - figure.X, 2) + Math.pow(i.Y - figure.Y, 2));
+			if (s < figure.radius + i.radius) {
 				return true;
 			}
 
@@ -271,7 +319,25 @@ function isCrossed(figure) {
 
 			if (isInside(figure, i))
 				return true;
-		}
+		} else if (figure.name != i.name && figure != i) {
+			let ball = (figure.name == 'ball') ? figure : i;
+			let f = (figure.name != 'ball') ? figure : i;
+
+			let toUp = Math.abs(ball.Y - f.Y);
+			let toFront = Math.abs(ball.X - f.X);
+			let toDown = Math.abs(ball.Y - f.Y - f.h);
+			let toBack = Math.abs(ball.X - f.X - f.w);
+
+			if ((toUp < ball.radius && ball.X + ball.radius >= f.X && ball.X - ball.radius <= f.X + f.w) ||
+				(toFront < ball.radius && ball.Y + ball.radius >= f.Y && ball.Y - ball.radius <= f.Y + f.h) ||
+				(toDown < ball.radius && ball.X + ball.radius >= f.X && ball.X - ball.radius <= f.X + f.w) ||
+				(toBack < ball.radius && ball.Y + ball.radius >= f.Y && ball.Y - ball.radius <= f.Y + f.h))
+			{
+				return true;
+			}
+			if (isInside(figure, i))
+				return true;
+		} 
 	}
 	return false;
 }
@@ -300,20 +366,20 @@ function getLines(figure) {
 	let lines = [];
 	if (figure.name == 'rect') {
 		let a = {
-			x: figure.posX - figure.w / 2,
-			y: figure.posY - figure.h / 2,
+			x: figure.X,
+			y: figure.Y,
 		};
 		let b = {
-			x: figure.posX + figure.w / 2,
-			y: figure.posY - figure.h / 2,
+			x: figure.X + figure.w,
+			y: figure.Y,
 		};
 		let c = {
-			x: figure.posX + figure.w / 2,
-			y: figure.posY + figure.h / 2,
+			x: figure.X + figure.w,
+			y: figure.Y + figure.h,
 		};
 		let d = {
-			x: figure.posX - figure.w / 2,
-			y: figure.posY + figure.h / 2,
+			x: figure.X,
+			y: figure.Y + figure.h,
 		}
 
 		lines.push(a);
@@ -331,51 +397,67 @@ function getLines(figure) {
 
 	return lines;
 }
+// function isInside(f1, f2) {
+// 	//f2 внутри f1
+// 	if (f1.w > f2.w && f1.h > f2.h) {
+// 		//преверяем a.x
+// 		if (f1.X > f2.X)
+// 			return false;
+// 		//преверяем a.y
+// 		if (f1.Y > f2.Y)
+// 			return false;
+// 		//преверяем c.x
+// 		if (f1.X + f1.w < f2.X + f2.w)
+// 			return false;
+// 		//преверяем c.y
+// 		if (f1.Y + f1.h < f2.Y + f2.h)
+// 			return false;
+// 		return true;
+// 	}
+// 	//f1 внутри f2
+// 	if (f1.w < f2.w && f1.h < f2.h) {
+// 		//преверяем a.x
+// 		if (f1.X < f2.X)
+// 			return false;
+// 		//преверяем a.y
+// 		if (f1.Y < f2.Y)
+// 			return false;
+// 		//преверяем c.x
+// 		if (f1.X + f1.w > f2.X + f2.w)
+// 			return false;
+// 		//преверяем c.y
+// 		if (f1.Y + f1.h > f2.Y + f2.h)
+// 			return false;
+// 		return true;
+// 	}
+// 	return false;
+// }
 function isInside(f1, f2) {
-	//f2 внутри f1
-	if (f1.w > f2.w && f1.h > f2.h) {
-		//преверяем a.x
-		if (f1.posX - f1.w / 2 > f2.posX - f2.w / 2)
-			return false;
-		//преверяем a.y
-		if (f1.posY - f1.h / 2 > f2.posY - f2.h / 2)
-			return false;
-		//преверяем c.x
-		if (f1.posX + f1.w / 2 < f2.posX + f2.w / 2)
-			return false;
-		//преверяем c.y
-		if (f1.posY + f1.h / 2 < f2.posY + f2.h / 2)
-			return false;
+	let max = (f1.X > f2.X) ? f1 : f2;
+	let min = (f1.X < f2.X) ? f1 : f2;
+
+	if (min.name == 'circle')
+		return false;
+
+	if (max.Y > min.Y && max.X - min.X < min.w && max.Y - min.Y < min.h)
 		return true;
-	}
-	//f1 внутри f2
-	if (f1.w < f2.w && f1.h < f2.h) {
-		//преверяем a.x
-		if (f1.posX - f1.w / 2 < f2.posX - f2.w / 2)
-			return false;
-		//преверяем a.y
-		if (f1.posY - f1.h / 2 < f2.posY - f2.h / 2)
-			return false;
-		//преверяем c.x
-		if (f1.posX + f1.w / 2 > f2.posX + f2.w / 2)
-			return false;
-		//преверяем c.y
-		if (f1.posY + f1.h / 2 > f2.posY + f2.h / 2)
-			return false;
-		return true;
-	}
+	
 	return false;
 }
+
 function isBig(figure) {
 	if (figure.name == 'ball') {
-		return figure.rBall >= 55;
+		return figure.radius >= 55;
 	}
 	if (figure.name == 'rect') {
 		return figure.w >= 110 || figure.h >= 110;
 	}
 	return false; //во избежание ошибок
 }
-
+function isAbroad(figure) {
+	var x = figure.X > canvas.width || figure.X < 0 || figure.Y < 0 || figure.Y > canvas.height;
+	return x;
+}
 
 function startMove() {
 	clearInterval(idTimer);
