@@ -1,5 +1,5 @@
 var canvas, ctx, figures, idTimer, allOrientation = 'up';
-var minSpeed = 4, maxSpeed = 20;
+var minSpeed = 4, maxSpeed = 20, pops = [], maxHealth = 5;
 Figure = new Class ({
 	name: 'figure',
 	X: 0,
@@ -7,6 +7,7 @@ Figure = new Class ({
 	colFigure:"rgb(0,0,0)",
 	orientation: 'up',
 	speed: 4,
+	health: maxHealth,
 
 	initialize: function(pX, pY) {
 		this.X = pX;
@@ -161,6 +162,15 @@ function drawBack(ctx,col1,col2,w,h) {
 	ctx.fillRect(0,0,w,h);
 	ctx.restore();
 }
+function drawPops() {
+	for (let i = 0; i < pops.length;) {
+		pop(pops[i]);
+		if (pops[i].health == 0) 
+			pops.splice(i,1);
+		else 
+			i++;
+	}
+}
 // инициализация работы
 function init() {
 	canvas = document.getElementById('canvas');
@@ -171,7 +181,7 @@ function init() {
 		//создаем 10 шариков, заноси их в массив и выводим на canvas
 		figures = [];
 		for (var i = 1; i<=10;i++) {
-			// var item = new Rect(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
+			// var item = new Star(10+Math.random()*(canvas.width-30), 10+Math.random()*(canvas.height-30));
 			var item;
 			switch (Math.floor(Math.random() * 3)) {
 				case (0):
@@ -195,7 +205,7 @@ function goInput(event) {
 
 	var x = event.clientX - elem.x;
 	var y = event.clientY - elem.y;
-	// var item = new Ball(x,y);
+	// var item = new Star(x,y);
 	var item;
 	switch (Math.floor(Math.random() * 3)) {
 		case (0):
@@ -214,11 +224,14 @@ function goInput(event) {
 function moveFigures() {
 	//реализация движения шариков, находящихся в массиве figures
 	drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
+	drawPops();
 	for (var i = 0; i < figures.length;i) {
 		figures[i].move();
 		figures[i].draw(ctx);
-		if (isAbroad(figures[i]) || isCrossed(figures[i]) || isBig(figures[i])) 
+		if (isAbroad(figures[i]) || isCrossed(figures[i]) || isBig(figures[i])) {
+			pop(figures[i]);
 			figures.splice(i,1);
+		}
 		else 
 			i++;
 	}
@@ -298,12 +311,12 @@ function moveChaos(figure) {
 
 function isCrossed(figure) {
 	for (let i of figures) {
-		//ball && ball
+		//circle && circle
 		if (figure.name == 'circle' && i.name == "circle" && figure != i) {
 			let s = Math.sqrt(Math.pow(i.X - figure.X, 2) + Math.pow(i.Y - figure.Y, 2));
-			if (s < figure.radius + i.radius) {
+			if (s < figure.radius + i.radius) 
 				return true;
-			}
+			
 
 			//rect && rect (line && line)
 		} else if (figure.name == 'rect' && i.name == 'rect' && figure != i) {
@@ -312,31 +325,34 @@ function isCrossed(figure) {
 
 			for (let j = 0; j < linesFigure.length / 2; j++) {
 				for (let k = 0; k < linesI.length / 2; k++) {
-					if (isLineCrossed(linesFigure[j*2], linesFigure[j*2+1], linesI[k*2], linesI[k*2+1]))
+					if (isLineCrossed(linesFigure[j*2], linesFigure[j*2+1], linesI[k*2], linesI[k*2+1])) {
 						return true;
+					}
 				}
 			}
 
 			if (isInside(figure, i))
 				return true;
+			//rect && circle
 		} else if (figure.name != i.name && figure != i) {
-			let ball = (figure.name == 'ball') ? figure : i;
-			let f = (figure.name != 'ball') ? figure : i;
+			let circle = (figure.name == 'circle') ? figure : i;
+			let f = (figure.name != 'circle') ? figure : i;
 
-			let toUp = Math.abs(ball.Y - f.Y);
-			let toFront = Math.abs(ball.X - f.X);
-			let toDown = Math.abs(ball.Y - f.Y - f.h);
-			let toBack = Math.abs(ball.X - f.X - f.w);
+			let toUp = Math.abs(circle.Y - f.Y);
+			let toFront = Math.abs(circle.X - f.X);
+			let toDown = Math.abs(circle.Y - f.Y - f.h);
+			let toBack = Math.abs(circle.X - f.X - f.w);
 
-			if ((toUp < ball.radius && ball.X + ball.radius >= f.X && ball.X - ball.radius <= f.X + f.w) ||
-				(toFront < ball.radius && ball.Y + ball.radius >= f.Y && ball.Y - ball.radius <= f.Y + f.h) ||
-				(toDown < ball.radius && ball.X + ball.radius >= f.X && ball.X - ball.radius <= f.X + f.w) ||
-				(toBack < ball.radius && ball.Y + ball.radius >= f.Y && ball.Y - ball.radius <= f.Y + f.h))
+			if ((toUp < circle.radius && circle.X + circle.radius >= f.X && circle.X - circle.radius <= f.X + f.w) ||
+				(toFront < circle.radius && circle.Y + circle.radius >= f.Y && circle.Y - circle.radius <= f.Y + f.h) ||
+				(toDown < circle.radius && circle.X + circle.radius >= f.X && circle.X - circle.radius <= f.X + f.w) ||
+				(toBack < circle.radius && circle.Y + circle.radius >= f.Y && circle.Y - circle.radius <= f.Y + f.h))
 			{
 				return true;
 			}
-			if (isInside(figure, i))
+			if (isInside(figure, i)) 
 				return true;
+			
 		} 
 	}
 	return false;
@@ -397,41 +413,7 @@ function getLines(figure) {
 
 	return lines;
 }
-// function isInside(f1, f2) {
-// 	//f2 внутри f1
-// 	if (f1.w > f2.w && f1.h > f2.h) {
-// 		//преверяем a.x
-// 		if (f1.X > f2.X)
-// 			return false;
-// 		//преверяем a.y
-// 		if (f1.Y > f2.Y)
-// 			return false;
-// 		//преверяем c.x
-// 		if (f1.X + f1.w < f2.X + f2.w)
-// 			return false;
-// 		//преверяем c.y
-// 		if (f1.Y + f1.h < f2.Y + f2.h)
-// 			return false;
-// 		return true;
-// 	}
-// 	//f1 внутри f2
-// 	if (f1.w < f2.w && f1.h < f2.h) {
-// 		//преверяем a.x
-// 		if (f1.X < f2.X)
-// 			return false;
-// 		//преверяем a.y
-// 		if (f1.Y < f2.Y)
-// 			return false;
-// 		//преверяем c.x
-// 		if (f1.X + f1.w > f2.X + f2.w)
-// 			return false;
-// 		//преверяем c.y
-// 		if (f1.Y + f1.h > f2.Y + f2.h)
-// 			return false;
-// 		return true;
-// 	}
-// 	return false;
-// }
+
 function isInside(f1, f2) {
 	let max = (f1.X > f2.X) ? f1 : f2;
 	let min = (f1.X < f2.X) ? f1 : f2;
@@ -444,9 +426,8 @@ function isInside(f1, f2) {
 	
 	return false;
 }
-
 function isBig(figure) {
-	if (figure.name == 'ball') {
+	if (figure.name == 'circle') {
 		return figure.radius >= 55;
 	}
 	if (figure.name == 'rect') {
@@ -459,6 +440,72 @@ function isAbroad(figure) {
 	return x;
 }
 
+function pop(f) {
+	if (f.health == maxHealth) {
+		pops.push(f);
+	}
+
+	ctx.beginPath();
+	if (f.name == 'circle') {
+		ctx.fillStyle = 'black';
+		var rot = Math.PI / 2 * 3;
+
+		let x = f.X;
+		let y = f.Y;
+		let step = Math.PI / 13;
+
+		for (let i = 0; i < 13; i++) {
+			x = f.X + Math.cos(rot) * (f.radius + 6);
+			y = f.Y + Math.sin(rot) * (f.radius + 6);
+			ctx.moveTo(x, y);
+
+			x = f.X + Math.cos(rot) * (f.radius + 14);
+			y = f.Y + Math.sin(rot) * (f.radius + 14);
+			ctx.lineTo(x, y);
+			rot += step * 2;
+		}
+	} else {
+		var step = 10;
+		let x = f.X + step / 2;
+		let y = f.Y - step / 2;
+		for (let i = 0; i < f.w / step; i++) {
+			ctx.moveTo(x, y);
+			ctx.lineTo(x, y - step);
+
+			ctx.moveTo(x, y + f.h + step);
+			ctx.lineTo(x, y + f.h + step * 2);
+
+			x += step;
+		}
+
+		x = f.X - step / 2;
+		y = f.Y + step / 2;
+		for (let i = 0; i < f.h / step; i++) {
+			ctx.moveTo(x, y);
+			ctx.lineTo(x - step, y);
+
+			ctx.moveTo(x + f.w + step, y);
+			ctx.lineTo(x + f.w + step * 2, y);
+
+			y += step;
+		}
+
+		ctx.moveTo(f.X - step/2, f.Y - step/2);
+		ctx.lineTo(f.X - step/4*5, f.Y - step/4*5);
+
+		ctx.moveTo(f.X + f.w + step/2, f.Y - step/2);
+		ctx.lineTo(f.X + f.w + step/4*5, f.Y - step/4*5);
+
+		ctx.moveTo(f.X - step/2, f.Y + f.h + step/2);
+		ctx.lineTo(f.X - step/4*5, f.Y + f.h + step/4*5);
+
+		ctx.moveTo(f.X + f.w + step/2, f.Y + f.h + step/2);
+		ctx.lineTo(f.X + f.w + step/4*5, f.Y + f.h + step/4*5);
+	}
+
+	ctx.stroke();
+	f.health--;
+}
 function startMove() {
 	clearInterval(idTimer);
 	idTimer = setInterval('moveFigures();',50);
