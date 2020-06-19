@@ -13,11 +13,12 @@
 </head>
 <body onload="init();">
 	<div>
-		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"></canvas>
+		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"
+		oncontextmenu="rightClick();return false"></canvas>
 		<form>
 			<form>
-				<input type="button" value="Start">
-				<input type="button" value="Finish">
+				<input type="button" value="Start" onclick="startPlay();">
+				<input type="button" value="Finish" onclick="stopPlay();">
 			</form>
 		</form>
 	</div>
