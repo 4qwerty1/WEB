@@ -1,5 +1,5 @@
-var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer;
-var bullets = [], pause = true;
+var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemesTimer, enemes = [];
+var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 1, maxLevel = 10;
 Gun = new Class({
 	length: 40,
 	corner: Math.PI / 4,
@@ -20,17 +20,23 @@ Gun = new Class({
 		ctx.moveTo(0, canvas.height);
 		ctx.lineTo(this.length * Math.cos(this.corner), canvas.height - this.length * Math.sin(this.corner));
 		ctx.stroke();
+
+		ctx.lineWidth = 1;
 	},
 });
+
 Bullet = new Class({
 	x: 0, 
 	y: 0,
 	aX: 0, 
 	aY: 0,
-	radius: 5,
+	radius: 8,
 	time: 0,
 	speed: 0,
 	corner: 0,
+	
+	lastX: 0,
+	lastY: 0,
 	initialize: function() {
 		this.x = gun.length * Math.cos(gun.corner);
 		this.y = canvas.height - gun.length * Math.sin(gun.corner);
@@ -40,6 +46,9 @@ Bullet = new Class({
 		this.aY = this.speed * Math.sin(this.corner);
 	},
 	move: function() {
+		this.lastX = this.x;
+		this.lastY = this.y;
+
 		this.time++;
 		this.x += this.aX;
 		this.y += -this.aY + g * this.time / 2;
@@ -55,14 +64,71 @@ Bullet = new Class({
 Bullet1 = new Class({
 	Extends: Bullet,
 	color: 'green',
-	speed: 66,
+	speed: 68,
 	damage: 1,
 });
 Bullet2 = new Class({
 	Extends: Bullet,
 	color: 'red',
-	speed: 50,
+	speed: 55,
 	damage: 2,
+});
+
+Enemy = new Class({
+	x: 0,
+	y: 0,
+	color: "rgb(0,0,0)",
+	initialize: function() {
+		this.x = canvas.width - 1;
+		this.y = 10 + Math.random() * (canvas.height - 30);
+		this.color = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+	},
+	move: function() {
+		this.x -= this.speed + level;
+	},
+});
+Ball = new Class({
+	Extends: Enemy,
+	speed: 2,
+	radius: 0,
+	health: 0,
+	name: 'ball',
+	initialize: function() {
+		this.parent();
+		this.radius = 15 + Math.random() * 20;
+		this.health += level / 3;
+	},
+	draw: function () {
+		ctx.beginPath();
+		ctx.fillStyle = this.color;
+		ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI, false);
+		ctx.fill();
+		ctx.fillStyle = 'black';
+		ctx.stroke();
+		ctx.closePath();
+	}
+});
+Rect = new Class({
+	Extends: Enemy,
+	speed: 1,
+	widht: 0,
+	height: 0,
+	health: 1,
+	name: 'rect',
+	initialize: function() {
+		this.parent();
+		this.width = 30 + Math.random() * 40;
+		this.height = this.width;
+		this.health += level;
+	},
+	draw: function() {
+		ctx.beginPath();
+		ctx.fillStyle = this.color;
+		ctx.fillRect(this.x, this.y, this.width, this.width);
+		ctx.fillStyle = 'black';
+		ctx.strokeRect(this.x, this.y, this.width, this.width);
+		ctx.closePath();
+	}
 });
 function init() {
 	canvas = document.getElementById('canvas');
@@ -84,32 +150,225 @@ function clearCanvas() {
 	ctx.restore();
 }
 function mouseMove(event) {
-	var elem = canvas.getBoundingClientRect();
+	if (canvas) {
+		var elem = canvas.getBoundingClientRect();
 
-	var x = event.clientX - elem.x;
-	var y = event.clientY - elem.y;
-	gun.aim(x, y);
-
-	if (pause) {
-		clearCanvas();
-		for (let i of bullets)
-			i.draw();
+		var x = event.clientX - elem.x;
+		var y = event.clientY - elem.y;
+		gun.aim(x, y);
 	}
-	gun.draw();
 }
 function plaing() {
 	clearCanvas();
 	gun.draw();
 	for (var i = 0; i < bullets.length; i) {
 		bullets[i].move();
-		bullets[i].draw();
-		if (isAbroad(bullets[i])) {
+		if (isAbroad(bullets[i]) || Hit(bullets[i])) {
 			bullets.splice(i,1);
 		}
-		else 
+		else {
+			bullets[i].draw();
 			i++;
+		}
+	}
+
+	for (var i = 0; i < enemes.length; i) {
+		if (isAbroad(enemes[i]) || enemes[i].health <= 0) {
+			enemes.splice(i,1);
+		}
+		else {
+			enemes[i].move();
+			enemes[i].draw();
+			i++;
+		}
+	}	
+}
+function createEnemes () {
+	level += (countEn % 30 == 0) ? 1 : 0;
+	let chanse = Math.floor( Math.random() * Math.min(6 + level, maxEnemesInTime));
+	if (chanse >= 4) {
+		for (let i = 0; i < Math.floor( Math.random() * (2 + level)); i++) {
+			countEn++;
+			switch(Math.floor(Math.random() * 2)) {
+				case (0):
+				enemes.push(new Ball());
+				break;
+				case (1):
+				enemes.push(new Rect());
+				break;
+			}
+
+		}
 	}
 }
+
+
+
+function isAbroad(shape) {
+	var x = shape.x > canvas.width || shape.x < 0 || shape.y < 0 || shape.y > canvas.height;
+	return x;
+}
+function Hit(bullet) {
+	let rect = {
+		x: Math.min(bullet.x, bullet.lastX), 
+		y: Math.min(bullet.y, bullet.lastY),
+		width: Math.max(bullet.x, bullet.lastX) - Math.min(bullet.x, bullet.lastX),
+		height: Math.max(bullet.y, bullet.lastY) - Math.min(bullet.y, bullet.lastY),
+	};
+
+	for (let enemy of enemes) {
+		// enemy.draw();
+		if (enemy.name == 'ball') {
+			if (crossBallRect(enemy, rect)) {
+				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
+				for (let i = 1; i < count; i++) {
+					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
+					let bX = rect.x + i * rect.width / count; //координата x на отрезке
+					let bY = rect.y + rect.height * (1/2 + m/2);
+					bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
+
+					let tmpBullet = {
+						x: bX,
+						y: bY,
+						radius: bullet.radius,
+					};
+					if (crossBallBall(enemy, tmpBullet)){
+						enemy.health -= bullet.damage;
+						return true;
+					}
+				}
+			}
+		} else {
+			if (crossRectRect(enemy, rect)) {
+				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
+				for (let i = 1; i < count; i++) {
+					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
+					let bX = rect.x + i * rect.width / count; //координата x на отрезке
+					let bY = rect.y + rect.height * (1/2 + m/2);
+					bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
+
+					let tmpBullet = {
+						x: bX,
+						y: bY,
+						radius: bullet.radius,
+					};
+					if (crossBallRect(tmpBullet, enemy)){
+						enemy.health -= bullet.damage;
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+function crossBallBall(f1, f2) {
+	let s = Math.sqrt(Math.pow(f1.x - f2.x, 2) + Math.pow(f1.y - f2.y, 2));
+	if (s < f2.radius + f1.radius) 
+		return true;
+	return false;
+}
+function crossBallRect(ball, rect) {
+	let toUp = Math.abs(ball.y - rect.y);
+	let toFront = Math.abs(ball.x - rect.x);
+	let toDown = Math.abs(ball.y - rect.y - rect.width);
+	let toBack = Math.abs(ball.x - rect.x - rect.width);
+
+	if ((toUp < ball.radius && ball.x + ball.radius >= rect.x && ball.x - ball.radius <= rect.x + rect.width) ||
+		(toFront < ball.radius && ball.y + ball.radius >= rect.y && ball.y - ball.radius <= rect.y + rect.height) ||
+		(toDown < ball.radius && ball.x + ball.radius >= rect.x && ball.x - ball.radius <= rect.x + rect.width) ||
+		(toBack < ball.radius && ball.y + ball.radius >= rect.y && ball.y - ball.radius <= rect.y + rect.height))
+	{
+		return true;
+	}
+	return false;
+}
+function crossRectRect(f1, f2) {
+	let linesF1 = getLines(f1);
+	let linesF2 = getLines(f2);
+
+	for (let j = 0; j < linesF2.length / 2; j++) {
+		for (let k = 0; k < linesF1.length / 2; k++) {
+			if (isLineCrossed(linesF2[j*2], linesF2[j*2+1], linesF1[k*2], linesF1[k*2+1])) {
+				return true;
+			}
+		}
+	}
+	if (isInside(f1, f2))
+		return true;
+
+	return false;
+}
+function isLineCrossed(a, b, c, d) {
+	function area(X, Y, Z) {
+		return (Y.x - X.x) * (Z.y - X.y) - (Y.y - X.y) * (Z.x - X.x);
+	}
+	function onLine(x1, x2, x3, x4) {
+		if (x1 > x2) {
+			let t = x1;
+			x1 = x2;
+			x2 = t;
+		}
+		if (x3 > x4) {
+			let t = x3;
+			x3 = x4;
+			x4 = t;
+		}
+		return Math.max(x1, x3) <= Math.min(x2, x4);
+	}
+	return onLine(a.x, b.x, c.x, d.x) && onLine(a.y, b.y, c.y, d.y) && (area(a,b,c) * area(a,b,d) <= 0) && (area(c,d,a) * area(c,d,b) <= 0);
+}
+function getLines(f) {
+	let lines = [];
+	
+	let a = {
+		x: f.x,
+		y: f.y,
+	};
+	let b = {
+		x: f.x + f.width,
+		y: f.y,
+	};
+	let c = {
+		x: f.x + f.width,
+		y: f.y + f.height,
+	};
+	let d = {
+		x: f.x,
+		y: f.y + f.height,
+	}
+
+	lines.push(a);
+	lines.push(b);
+
+	lines.push(b);
+	lines.push(c);
+
+	lines.push(c);
+	lines.push(d);
+
+	lines.push(d);
+	lines.push(a);
+
+	return lines;
+}
+function isInside(f1, f2) {
+	let max = (f1.x > f2.x) ? f1 : f2;
+	let min = (f1.x < f2.x) ? f1 : f2;
+
+	if (min.name == 'ball')
+		return false;
+
+	if (max.y > min.y && max.x - min.x < min.width && max.y - min.y < min.height)
+		return true;
+	
+	return false;
+}
+
+
+
+
+
 function goInput(event) {
 	if (event.which == 1)
 		bullets.push(new Bullet1());
@@ -117,19 +376,18 @@ function goInput(event) {
 		bullets.push(new Bullet2());
 }
 function rightClick() {
+
 	bullets.push(new Bullet2());
 }
-function isAbroad(shape) {
-	var x = shape.x > canvas.width || shape.x < 0 || shape.y < 0 || shape.y > canvas.height;
-	return x;
-}
-
 function startPlay() {
 	clearInterval(idTimer);
 	pause = false;
 	idTimer = setInterval('plaing();', 50);
+	enemesTimer = setInterval('createEnemes();', 1000);
+
 }
 function stopPlay() {
 	pause = true;
 	clearInterval(idTimer);
+	clearInterval(enemesTimer);
 }
