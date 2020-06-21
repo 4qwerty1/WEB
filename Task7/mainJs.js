@@ -1,5 +1,6 @@
-var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemesTimer, enemes = [];
+var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemiesTimer, enemies = [];
 var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 1, maxLevel = 10;
+var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100;
 Gun = new Class({
 	length: 40,
 	corner: Math.PI / 4,
@@ -59,6 +60,41 @@ Bullet = new Class({
 		ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI, false);
 		ctx.closePath();
 		ctx.fill();
+
+
+		//отрисовка промежутков
+		ctx.beginPath();
+		ctx.fillStyle = 'black';
+		ctx.moveTo(this.lastX, this.lastY);
+		ctx.lineTo(this.x, this.y);
+		ctx.closePath();
+		ctx.stroke();
+
+		//отрисовка области попадания
+		let rect = {
+			x: Math.min(this.x, this.lastX), 
+			y: Math.min(this.y, this.lastY),
+			width: Math.max(this.x, this.lastX) - Math.min(this.x, this.lastX),
+			height: Math.max(this.y, this.lastY) - Math.min(this.y, this.lastY),
+		};
+		ctx.beginPath();
+		ctx.fillStyle = 'red';
+		ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+		ctx.closePath();
+
+		//отрисовка промежуточных состояний пули
+		ctx.beginPath();
+		ctx.fillStyle = 'blue';
+		let count = Math.round(Math.max(rect.width, rect.height) / this.radius);
+		for (let i = 1; i < count; i++) {
+			let m = (this.y - this.lastY > 0) ? -1 : 1;
+			let bX = rect.x + i * rect.width / count; //координата x на отрезке
+			let bY = rect.y + rect.height * (1/2 + m/2);
+			bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
+			ctx.arc(bX, bY, this.radius, 0, 2*Math.PI, false);
+		}
+		ctx.closePath();
+		ctx.fill();
 	},
 });
 Bullet1 = new Class({
@@ -80,8 +116,9 @@ Enemy = new Class({
 	color: "rgb(0,0,0)",
 	initialize: function() {
 		this.x = canvas.width - 1;
-		this.y = 10 + Math.random() * (canvas.height - 30);
+		this.y = 20 + Math.random() * (canvas.height - 50);
 		this.color = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+		// this.speed = this.speed + level;
 	},
 	move: function() {
 		this.x -= this.speed + level;
@@ -96,7 +133,7 @@ Ball = new Class({
 	initialize: function() {
 		this.parent();
 		this.radius = 15 + Math.random() * 20;
-		this.health += level / 3;
+		this.health += Math.floor(level / 2);
 	},
 	draw: function () {
 		ctx.beginPath();
@@ -158,49 +195,65 @@ function mouseMove(event) {
 		gun.aim(x, y);
 	}
 }
-function plaing() {
+function reloadWindow() {
 	clearCanvas();
 	gun.draw();
+	reloadBullets();
 	for (var i = 0; i < bullets.length; i) {
 		bullets[i].move();
+		bullets[i].draw();
 		if (isAbroad(bullets[i]) || Hit(bullets[i])) {
 			bullets.splice(i,1);
 		}
 		else {
-			bullets[i].draw();
+			// bullets[i].draw();
 			i++;
 		}
 	}
 
-	for (var i = 0; i < enemes.length; i) {
-		if (isAbroad(enemes[i]) || enemes[i].health <= 0) {
-			enemes.splice(i,1);
+	for (var i = 0; i < enemies.length; i) {
+		if (isAbroad(enemies[i]) || enemies[i].health <= 0) {
+			enemies.splice(i,1);
 		}
 		else {
-			enemes[i].move();
-			enemes[i].draw();
+			enemies[i].move();
+			enemies[i].draw();
 			i++;
 		}
 	}	
 }
-function createEnemes () {
-	level += (countEn % 30 == 0) ? 1 : 0;
+function createEnemes() {
+	levelUp();
 	let chanse = Math.floor( Math.random() * Math.min(6 + level, maxEnemesInTime));
 	if (chanse >= 4) {
 		for (let i = 0; i < Math.floor( Math.random() * (2 + level)); i++) {
 			countEn++;
 			switch(Math.floor(Math.random() * 2)) {
 				case (0):
-				enemes.push(new Ball());
+				enemies.push(new Ball());
 				break;
 				case (1):
-				enemes.push(new Rect());
+				enemies.push(new Rect());
 				break;
 			}
 
 		}
 	}
 }
+function levelUp() {
+	level = 1 + Math.floor(countEn / 30);
+	document.getElementById('level').innerHTML = level;
+	document.getElementById('enemies').innerHTML = countEn;
+}
+function reloadBullets() {
+	let x = document.getElementById('bullet1');
+	reloadB1 = Math.min(100, reloadB1 + Math.round((Date.now() - shotTB1) / 10));
+	x.innerHTML = (reloadB1 == 100) ? 'READY' : reloadB1;
+
+	x = document.getElementById('bullet2');
+	reloadB2 = Math.min(100, reloadB2 + Math.round((Date.now() - shotTB2) / 100));
+	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
+}	
 
 
 
@@ -216,11 +269,11 @@ function Hit(bullet) {
 		height: Math.max(bullet.y, bullet.lastY) - Math.min(bullet.y, bullet.lastY),
 	};
 
-	for (let enemy of enemes) {
+	for (let enemy of enemies) {
 		// enemy.draw();
 		if (enemy.name == 'ball') {
 			if (crossBallRect(enemy, rect)) {
-				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
+				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius);
 				for (let i = 1; i < count; i++) {
 					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
 					let bX = rect.x + i * rect.width / count; //координата x на отрезке
@@ -239,7 +292,7 @@ function Hit(bullet) {
 				}
 			}
 		} else {
-			if (crossRectRect(enemy, rect)) {
+			if (crossRectRect(enemy, rect) || crossBallRect(bullet, enemy)) {
 				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
 				for (let i = 1; i < count; i++) {
 					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
@@ -256,6 +309,10 @@ function Hit(bullet) {
 						enemy.health -= bullet.damage;
 						return true;
 					}
+				}
+				if (crossBallRect(bullet, enemy)) {
+					enemy.health -= bullet.damage;
+					return true;
 				}
 			}
 		}
@@ -370,24 +427,37 @@ function isInside(f1, f2) {
 
 
 function goInput(event) {
-	if (event.which == 1)
-		bullets.push(new Bullet1());
-	else if (event.which == 3)
-		bullets.push(new Bullet2());
+	if (event.which == 1) {
+		if (reloadB1 == 100) {
+			shotTB1 = Date.now();
+			reloadB1 = 0;
+			bullets.push(new Bullet1());
+		}
+	}
+	else if (event.which == 3) {
+		if (reloadB2 == 100) {
+			shotTB2 = Date.now();
+			reloadB2 = 0;
+			bullets.push(new Bullet2());
+		}
+	}
 }
 function rightClick() {
-
-	bullets.push(new Bullet2());
+	if (reloadB2 == 100) {
+		shotTB2 = Date.now();
+		reloadB2 = 0;
+		bullets.push(new Bullet2());
+	}
 }
 function startPlay() {
 	clearInterval(idTimer);
 	pause = false;
-	idTimer = setInterval('plaing();', 50);
-	enemesTimer = setInterval('createEnemes();', 1000);
+	idTimer = setInterval('reloadWindow();', 50);
+	enemiesTimer = setInterval('createEnemes();', 1000);
 
 }
 function stopPlay() {
 	pause = true;
 	clearInterval(idTimer);
-	clearInterval(enemesTimer);
+	clearInterval(enemiesTimer);
 }

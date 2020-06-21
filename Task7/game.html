@@ -9,6 +9,12 @@
 		div {
 			margin-left: 20px;
 		}
+		canvas {
+			display: inline;
+		}
+		table, th, td{
+			border: 1px solid black;
+		}
 	</style>
 </head>
 <body onload="init();">
@@ -22,5 +28,23 @@
 			</form>
 		</form>
 	</div>
+	<table>
+		<tr>
+			<th>Снаряд 1</th>
+			<td id="bullet1">READY</td>
+		</tr>
+		<tr>
+			<th>Снаряд 2</th>
+			<td id="bullet2">READY</td>
+		</tr>
+		<tr>
+			<th>Уровень</th>
+			<td id="level">1</td>
+		</tr>
+		<tr>
+			<th>Кол-во врагов</th>
+			<td id="enemies">0</td>
+		</tr>
+	</table>
 </body>
 </html>
