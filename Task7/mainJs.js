@@ -1,6 +1,6 @@
 var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemiesTimer, enemies = [];
 var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 0, maxLevel = 10;
-var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100;
+var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100, userHealth = 3;
 Gun = new Class({
 	length: 40,
 	corner: Math.PI / 4,
@@ -117,10 +117,9 @@ Enemy = new Class({
 	maxHealth: 0,
 	initialize: function() {
 		this.x = canvas.width - 10;
-		this.y = 20 + Math.random() * (canvas.height - 50);
+		this.y = 30 + Math.random() * (canvas.height - 50);
 		this.color = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
 		this.maxHealth = this.health;
-		// this.speed = this.speed + level;
 	},
 	move: function() {
 		this.x -= this.speed + level;
@@ -201,6 +200,7 @@ function reloadWindow() {
 	clearCanvas();
 	gun.draw();
 	reloadBullets();
+	showUserHealth();
 	for (var i = 0; i < bullets.length; i) {
 		bullets[i].move();
 		// bullets[i].draw();
@@ -214,11 +214,15 @@ function reloadWindow() {
 	}
 
 	for (var i = 0; i < enemies.length; i) {
-		if (isAbroad(enemies[i]) || enemies[i].health <= 0) {
+		if (enemies[i].health <= 0) {
 			scoreUp(enemies[i]);
 			enemies.splice(i,1);
-		}
-		else {
+
+		} else if (isAbroad(enemies[i])) {
+			userHealth = Math.max(0, userHealth - 1);
+			enemies.splice(i, 1);
+
+		} else {
 			enemies[i].move();
 			enemies[i].draw();
 			i++;
@@ -247,7 +251,7 @@ function createEnemeis() {
 	levelUp();
 }
 function levelUp() {
-	level = 1 + Math.floor(countEn / 30);
+	level = Math.min(1 + Math.floor(countEn / 30), maxLevel);
 	document.getElementById('level').innerHTML = level;
 	document.getElementById('enemies').innerHTML = countEn;
 }
@@ -265,7 +269,24 @@ function reloadBullets() {
 	x = document.getElementById('bullet2');
 	reloadB2 = Math.min(100, reloadB2 + Math.round((Date.now() - shotTB2) / 100));
 	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
-}	
+}
+function showUserHealth() {
+	let r = 8;
+	let step = 5;
+	let indent = (2 * r + step) * userHealth - r;
+
+	ctx.beginPath();
+	ctx.fillStyle = 'red';
+	for (let i = 0; i < userHealth; i++) {
+		ctx.arc(canvas.width - indent, step + r, r, 0, 2*Math.PI, false);
+		indent -= step + 2 * r;
+	}
+	ctx.fill();
+
+	if (userHealth == 0) {
+		endGame();
+	}
+}
 
 
 
@@ -465,11 +486,23 @@ function startPlay() {
 	clearInterval(idTimer);
 	pause = false;
 	idTimer = setInterval('reloadWindow();', 50);
-	enemiesTimer = setInterval('createEnemeis();', 1000);
-
+	enemiesTimer = setInterval('createEnemeis();', 1000)
 }
 function stopPlay() {
 	pause = true;
 	clearInterval(idTimer);
 	clearInterval(enemiesTimer);
+}
+function endGame() {
+	stopPlay();
+	alert('You lose!');
+
+	//все отчистить
+	enemies = [];
+	bullets = [];
+	level = 1;
+	countEn = 0;
+	reloadB1 = 100;
+	reloadB2 = 100;
+	userHealth = 3;
 }
