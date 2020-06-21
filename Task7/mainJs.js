@@ -1,5 +1,5 @@
 var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemiesTimer, enemies = [];
-var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 1, maxLevel = 10;
+var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 0, maxLevel = 10;
 var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100;
 Gun = new Class({
 	length: 40,
@@ -114,10 +114,12 @@ Enemy = new Class({
 	x: 0,
 	y: 0,
 	color: "rgb(0,0,0)",
+	maxHealth: 0,
 	initialize: function() {
-		this.x = canvas.width - 1;
+		this.x = canvas.width - 10;
 		this.y = 20 + Math.random() * (canvas.height - 50);
 		this.color = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+		this.maxHealth = this.health;
 		// this.speed = this.speed + level;
 	},
 	move: function() {
@@ -128,12 +130,12 @@ Ball = new Class({
 	Extends: Enemy,
 	speed: 2,
 	radius: 0,
-	health: 0,
+	health: 1,
 	name: 'ball',
 	initialize: function() {
-		this.parent();
 		this.radius = 15 + Math.random() * 20;
 		this.health += Math.floor(level / 2);
+		this.parent();
 	},
 	draw: function () {
 		ctx.beginPath();
@@ -150,13 +152,13 @@ Rect = new Class({
 	speed: 1,
 	widht: 0,
 	height: 0,
-	health: 1,
+	health: 2,
 	name: 'rect',
 	initialize: function() {
-		this.parent();
 		this.width = 30 + Math.random() * 40;
 		this.height = this.width;
-		this.health += level;
+		this.health += Math.floor(level / 2);
+		this.parent();
 	},
 	draw: function() {
 		ctx.beginPath();
@@ -201,18 +203,19 @@ function reloadWindow() {
 	reloadBullets();
 	for (var i = 0; i < bullets.length; i) {
 		bullets[i].move();
-		bullets[i].draw();
+		// bullets[i].draw();
 		if (isAbroad(bullets[i]) || Hit(bullets[i])) {
 			bullets.splice(i,1);
 		}
 		else {
-			// bullets[i].draw();
+			bullets[i].draw();
 			i++;
 		}
 	}
 
 	for (var i = 0; i < enemies.length; i) {
 		if (isAbroad(enemies[i]) || enemies[i].health <= 0) {
+			scoreUp(enemies[i]);
 			enemies.splice(i,1);
 		}
 		else {
@@ -222,11 +225,11 @@ function reloadWindow() {
 		}
 	}	
 }
-function createEnemes() {
-	levelUp();
+function createEnemeis() {
 	let chanse = Math.floor( Math.random() * Math.min(6 + level, maxEnemesInTime));
 	if (chanse >= 4) {
-		for (let i = 0; i < Math.floor( Math.random() * (2 + level)); i++) {
+		let x = 1 + Math.floor( Math.random() * (2 + level));
+		for (let i = 0; i < x; i++) {
 			countEn++;
 			switch(Math.floor(Math.random() * 2)) {
 				case (0):
@@ -235,15 +238,24 @@ function createEnemes() {
 				case (1):
 				enemies.push(new Rect());
 				break;
+				default:
+				alert('smth wrong');
 			}
 
 		}
 	}
+	levelUp();
 }
 function levelUp() {
 	level = 1 + Math.floor(countEn / 30);
 	document.getElementById('level').innerHTML = level;
 	document.getElementById('enemies').innerHTML = countEn;
+}
+function scoreUp(enemy) {
+	if (enemy.health == 0) {
+		var n = Number(document.getElementById('score').innerHTML);
+		document.getElementById('score').innerHTML = n + enemy.maxHealth;
+	}
 }
 function reloadBullets() {
 	let x = document.getElementById('bullet1');
@@ -453,7 +465,7 @@ function startPlay() {
 	clearInterval(idTimer);
 	pause = false;
 	idTimer = setInterval('reloadWindow();', 50);
-	enemiesTimer = setInterval('createEnemes();', 1000);
+	enemiesTimer = setInterval('createEnemeis();', 1000);
 
 }
 function stopPlay() {

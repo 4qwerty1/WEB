@@ -9,11 +9,9 @@
 		div {
 			margin-left: 20px;
 		}
-		canvas {
-			display: inline;
-		}
-		table, th, td{
-			border: 1px solid black;
+		th, td{
+			width: 60px;
+			text-align: center;
 		}
 	</style>
 </head>
@@ -21,6 +19,28 @@
 	<div>
 		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"
 		oncontextmenu="rightClick();return false"></canvas>
+		<table border="1" style="display: inline-block;">
+			<tr>
+				<th>Снаряд 1</th>
+				<td id="bullet1">READY</td>
+			</tr>
+			<tr>
+				<th>Снаряд 2</th>
+				<td id="bullet2">READY</td>
+			</tr>
+			<tr>
+				<th>Уровень</th>
+				<td id="level">1</td>
+			</tr>
+			<tr>
+				<th>Кол-во врагов</th>
+				<td id="enemies">0</td>
+			</tr>
+			<tr>
+				<th>Счет:</th>
+				<td id="score">0</td>
+			</tr>
+		</table>
 		<form>
 			<form>
 				<input type="button" value="Play" onclick="startPlay();">
@@ -28,23 +48,6 @@
 			</form>
 		</form>
 	</div>
-	<table>
-		<tr>
-			<th>Снаряд 1</th>
-			<td id="bullet1">READY</td>
-		</tr>
-		<tr>
-			<th>Снаряд 2</th>
-			<td id="bullet2">READY</td>
-		</tr>
-		<tr>
-			<th>Уровень</th>
-			<td id="level">1</td>
-		</tr>
-		<tr>
-			<th>Кол-во врагов</th>
-			<td id="enemies">0</td>
-		</tr>
-	</table>
+
 </body>
 </html>
