@@ -275,13 +275,20 @@ function reloadBullets() {
 	reloadB2 = Math.min(100, reloadB2 + Math.round((Date.now() - shotTB2) / 100));
 	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
 }
+
+var heartbeat = 0;
 function showUserHealth() {
 	let size = 20;
 	let step = 5;
 	let indent = (size + step) * userHealth;
 
+	heartbeat = (userHealth == 1) ? (heartbeat + 1) % 11 : 0;
+	size -= heartbeat;
 	for (let i = 0; i < userHealth; i++) {
-		drawHeart(canvas.width - indent, step, size);
+		if (userHealth == 1)
+			drawHeart(canvas.width - indent - size/2 + step*3/2, step * 3 - size/2, size);
+		else
+			drawHeart(canvas.width - indent, step, size);
 		indent -= step + size;
 	}
 
