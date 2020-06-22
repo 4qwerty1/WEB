@@ -12,14 +12,19 @@
 		th, td{
 			width: 60px;
 			text-align: center;
+			border: 1px solid black;
+		}
+		table {
+			border: 1px solid black;
+			display: inline-block;
 		}
 	</style>
 </head>
-<body onload="init();">
+<body onload="init();" onunload="setLocalStorage();">
 	<div>
 		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"
 		oncontextmenu="rightClick();return false"></canvas>
-		<table border="1" style="display: inline-block;">
+		<table id="inform">
 			<tr>
 				<th>Снаряд 1</th>
 				<td id="bullet1">READY</td>
@@ -41,11 +46,12 @@
 				<td id="score">0</td>
 			</tr>
 		</table>
-		<form>
-			<form>
-				<input type="button" value="Play" onclick="startPlay();">
-				<input type="button" value="Pause" onclick="stopPlay();">
-			</form>
+		<table id="results"></table>
+		<form id="buttons">
+			<input type="button" value="Play" onclick="startPlay();">
+			<input type="button" value="Pause" onclick="stopPlay();">
+			<input type="button" value="Restart" onclick="restart();">
+			<input type="button" value="Change a player" onclick="changePlayer();">
 		</form>
 	</div>
 

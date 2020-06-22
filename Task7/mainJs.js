@@ -1,6 +1,7 @@
 var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemiesTimer, enemies = [];
 var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 0, maxLevel = 10;
 var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100, userHealth = 3;
+var userName, score = 0, players = [], Player = null;
 Gun = new Class({
 	length: 40,
 	corner: Math.PI / 4,
@@ -62,39 +63,39 @@ Bullet = new Class({
 		ctx.fill();
 
 
-		//отрисовка промежутков
-		ctx.beginPath();
-		ctx.fillStyle = 'black';
-		ctx.moveTo(this.lastX, this.lastY);
-		ctx.lineTo(this.x, this.y);
-		ctx.closePath();
-		ctx.stroke();
+		// //отрисовка промежутков
+		// ctx.beginPath();
+		// ctx.fillStyle = 'black';
+		// ctx.moveTo(this.lastX, this.lastY);
+		// ctx.lineTo(this.x, this.y);
+		// ctx.closePath();
+		// ctx.stroke();
 
-		//отрисовка области попадания
-		let rect = {
-			x: Math.min(this.x, this.lastX), 
-			y: Math.min(this.y, this.lastY),
-			width: Math.max(this.x, this.lastX) - Math.min(this.x, this.lastX),
-			height: Math.max(this.y, this.lastY) - Math.min(this.y, this.lastY),
-		};
-		ctx.beginPath();
-		ctx.fillStyle = 'red';
-		ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-		ctx.closePath();
+		// //отрисовка области попадания
+		// let rect = {
+		// 	x: Math.min(this.x, this.lastX), 
+		// 	y: Math.min(this.y, this.lastY),
+		// 	width: Math.max(this.x, this.lastX) - Math.min(this.x, this.lastX),
+		// 	height: Math.max(this.y, this.lastY) - Math.min(this.y, this.lastY),
+		// };
+		// ctx.beginPath();
+		// ctx.fillStyle = 'red';
+		// ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+		// ctx.closePath();
 
-		//отрисовка промежуточных состояний пули
-		ctx.beginPath();
-		ctx.fillStyle = 'blue';
-		let count = Math.round(Math.max(rect.width, rect.height) / this.radius);
-		for (let i = 1; i < count; i++) {
-			let m = (this.y - this.lastY > 0) ? -1 : 1;
-			let bX = rect.x + i * rect.width / count; //координата x на отрезке
-			let bY = rect.y + rect.height * (1/2 + m/2);
-			bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
-			ctx.arc(bX, bY, this.radius, 0, 2*Math.PI, false);
-		}
-		ctx.closePath();
-		ctx.fill();
+		// //отрисовка промежуточных состояний пули
+		// ctx.beginPath();
+		// ctx.fillStyle = 'blue';
+		// let count = Math.round(Math.max(rect.width, rect.height) / this.radius);
+		// for (let i = 1; i < count; i++) {
+		// 	let m = (this.y - this.lastY > 0) ? -1 : 1;
+		// 	let bX = rect.x + i * rect.width / count; //координата x на отрезке
+		// 	let bY = rect.y + rect.height * (1/2 + m/2);
+		// 	bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
+		// 	ctx.arc(bX, bY, this.radius, 0, 2*Math.PI, false);
+		// }
+		// ctx.closePath();
+		// ctx.fill();
 	},
 });
 Bullet1 = new Class({
@@ -175,6 +176,7 @@ function init() {
 		clearCanvas();
 		gun = new Gun();
 
+		changePlayer();
 		startPlay();
 	}
 }
@@ -256,10 +258,13 @@ function levelUp() {
 	document.getElementById('enemies').innerHTML = countEn;
 }
 function scoreUp(enemy) {
-	if (enemy.health == 0) {
-		var n = Number(document.getElementById('score').innerHTML);
-		document.getElementById('score').innerHTML = n + enemy.maxHealth;
+	if (enemy && enemy.health <= 0) {
+		score += enemy.maxHealth;
+
+		Player.value = score;
+		rewriteResultTable();
 	}
+	document.getElementById('score').innerHTML = score;
 }
 function reloadBullets() {
 	let x = document.getElementById('bullet1');
@@ -271,21 +276,42 @@ function reloadBullets() {
 	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
 }
 function showUserHealth() {
-	let r = 8;
+	let size = 20;
 	let step = 5;
-	let indent = (2 * r + step) * userHealth - r;
+	let indent = (size + step) * userHealth;
 
-	ctx.beginPath();
-	ctx.fillStyle = 'red';
 	for (let i = 0; i < userHealth; i++) {
-		ctx.arc(canvas.width - indent, step + r, r, 0, 2*Math.PI, false);
-		indent -= step + 2 * r;
+		drawHeart(canvas.width - indent, step, size);
+		indent -= step + size;
 	}
-	ctx.fill();
 
 	if (userHealth == 0) {
 		endGame();
 	}
+}
+function drawHeart(x, y, width) {
+	ctx.save();
+	ctx.beginPath();
+
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 3;
+	ctx.fillStyle = "red";	
+	
+
+	ctx.moveTo(x, y + width / 4);
+	ctx.quadraticCurveTo(x, y, x + width / 4, y);
+	ctx.quadraticCurveTo(x + width / 2, y, x + width / 2, y + width / 4);
+	ctx.quadraticCurveTo(x + width / 2, y, x + width * 3/4, y);
+	ctx.quadraticCurveTo(x + width, y, x + width, y + width / 4);
+	ctx.quadraticCurveTo(x + width, y + width / 2, x + width * 3/4, y + width * 3/4);
+	ctx.lineTo(x + width / 2, y + width);
+	ctx.lineTo(x + width / 4, y + width * 3/4);
+	ctx.quadraticCurveTo(x, y + width / 2, x, y + width / 4);
+	ctx.stroke();
+	ctx.fill();
+
+	ctx.closePath();
+	ctx.restore();
 }
 
 
@@ -461,14 +487,14 @@ function isInside(f1, f2) {
 
 function goInput(event) {
 	if (event.which == 1) {
-		if (reloadB1 == 100) {
+		if (reloadB1 == 100 && !pause) {
 			shotTB1 = Date.now();
 			reloadB1 = 0;
 			bullets.push(new Bullet1());
 		}
 	}
 	else if (event.which == 3) {
-		if (reloadB2 == 100) {
+		if (reloadB2 == 100 && !pause) {
 			shotTB2 = Date.now();
 			reloadB2 = 0;
 			bullets.push(new Bullet2());
@@ -484,20 +510,19 @@ function rightClick() {
 }
 function startPlay() {
 	clearInterval(idTimer);
+	clearInterval(enemiesTimer);
 	pause = false;
 	idTimer = setInterval('reloadWindow();', 50);
-	enemiesTimer = setInterval('createEnemeis();', 1000)
+	enemiesTimer = setInterval('createEnemeis();', 1000);
+
+	rewriteResultTable();
 }
 function stopPlay() {
 	pause = true;
 	clearInterval(idTimer);
 	clearInterval(enemiesTimer);
 }
-function endGame() {
-	stopPlay();
-	alert('You lose!');
-
-	//все отчистить
+function clearWindow() {
 	enemies = [];
 	bullets = [];
 	level = 1;
@@ -505,4 +530,91 @@ function endGame() {
 	reloadB1 = 100;
 	reloadB2 = 100;
 	userHealth = 3;
+	score = 0;
+	levelUp();
+	scoreUp();
+	reloadWindow();
 }
+
+function endGame() {
+	stopPlay();
+	alert('You lose!');
+
+	clearWindow();
+
+	setLocalStorage();
+	Player.value = 0;
+}
+function restart() {
+	clearWindow();
+	Player.value = 0;
+
+	startPlay();
+}
+function changePlayer() {
+	userName = prompt("Введите ваше имя:", 'Tom');
+	if (Player)
+		setLocalStorage();
+
+	players = [];
+	Player = null;
+	clearWindow();
+	getLocalStorage();
+	rewriteResultTable();
+}
+
+
+function getLocalStorage() {
+	for (let i = 0; i < localStorage.length; i++) {
+		let player = {};
+		player.name = localStorage.key(i);
+		player.value = Number(localStorage.getItem(player.name));
+
+		players.push(player);
+
+		if (player.name == userName) {
+			Player = player;
+			Player.value = 0;
+		}
+	}
+
+	if (Player == null) {
+		Player = {};
+		Player.name = userName;
+		Player.value = 0;
+
+		players.push(Player);
+	}
+}
+function setLocalStorage() {
+
+	localStorage.setItem(Player.name, Player.value);
+}
+function rewriteResultTable() {
+	players.sort((a, b) => b.value - a.value);
+
+	document.getElementById('results').remove();
+
+	var table = document.createElement('table');
+	table.setAttribute('id', 'results');
+	for (let i of players) {
+		var tr = document.createElement('tr');
+		table.appendChild(tr);
+
+		var th = document.createElement('th');
+		tr.appendChild(th);
+		th.innerHTML = i.name;
+
+		var td = document.createElement('td');
+		tr.appendChild(td);
+		td.innerHTML = i.value;
+
+		if (i == Player) {
+			tr.style.backgroundColor = '#CAECF9';
+		}
+	}
+
+	document.getElementsByTagName('div')[0].insertBefore(table, document.getElementById('buttons'));
+}
+
+
