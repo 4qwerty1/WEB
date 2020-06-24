@@ -13,6 +13,9 @@ function init() {
 	}
 
 	showTable();
+
+	if (!isCanMove())
+		gameOver();
 }
 function restart() {
 	score = 0;
@@ -80,8 +83,8 @@ function insertNumber() {
 }
 function showTable() {
 	var items = $('.item');
-	for (let i = 0; i < fieldSize; i++) {
-		for (let j = 0; j < fieldSize; j++) {
+	for (var i = 0; i < fieldSize; i++) {
+		for (var j = 0; j < fieldSize; j++) {
 			if (numbers[i][j] > 0) {
 				items[fieldSize * i + j].innerHTML = numbers[i][j];
 				items[fieldSize * i + j].style.background = `${colors[Math.log2(numbers[i][j])]}`;
@@ -168,7 +171,7 @@ function moveUp() {
 					}
 				}
 			}
-			showTable();
+			// showTable();
 		} while (flag);
 	}
 	showTable();
@@ -204,7 +207,7 @@ function moveDown() {
 					}
 				}
 			}
-			showTable();
+			// showTable();
 		} while (flag);
 	}
 	showTable();
@@ -240,7 +243,7 @@ function moveRight() {
 					}
 				}
 			}
-			showTable();
+			// showTable();
 		} while (flag);
 	}
 	showTable();
@@ -276,7 +279,7 @@ function moveLeft() {
 					}
 				}
 			}
-			showTable();
+			// showTable();
 		} while (flag);
 	}
 	showTable();

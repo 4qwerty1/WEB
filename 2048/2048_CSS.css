@@ -2,6 +2,7 @@ body {
 	font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
 	font-size: 20px;
 	color: #69625c;
+	user-select:none
 }
 #header, #footer {
 	width: 220px;
