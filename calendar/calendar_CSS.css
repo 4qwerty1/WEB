@@ -1,0 +1,57 @@
+body {
+	background: #3b3b3b;
+	color: white;
+	font-family: Arial;
+}
+
+#time {
+	font-size: 50px;
+}
+#date, #month{
+	padding-left: 5px;
+}
+
+#calendar {
+	padding: 10px
+}
+#days {
+	margin-top: 5px;
+}
+
+
+div {
+	border: 2px solid #3b3b3b;
+	cursor: default;
+}
+.day {
+	margin-top: 3px;
+
+	display: inline-block;
+	width: 35px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+
+	user-select:none
+}
+.curDay {
+	background: green;
+}
+.day:hover {
+	border-color: #757575;
+}
+.curDay.chosen {
+	border-color: red;
+}
+.chosen, .chosen:hover {
+	border-color: green;
+}
+
+
+
+.weekend {
+	color: red;
+}
+.passive {
+	color: 	#757575 !important;
+}
