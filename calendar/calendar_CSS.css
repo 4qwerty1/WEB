@@ -2,12 +2,38 @@ body {
 	background: #3b3b3b;
 	color: white;
 	font-family: Arial;
+	user-select:none;
+}
+input {
+	background: #3b3b3b;
+	color: white;
+	font-size: 15px;
+}
+#weekday span {
+	display: inline-block;
+	width: 35px;
+	text-align: center;
+
+	margin-left: 2px;
+	margin-right: 2px;
+
+	font-size: 12px;
+	font-style: italic;
 }
 
-#time {
+#calendar {
+	display: inline-block;
+	border: 1px solid;
+	overflow: hidden;
+	min-width: 310px;
+}
+#curTime {
 	font-size: 50px;
 }
-#date, #month{
+.clickable {
+	cursor: pointer;
+}
+#curDate, #month{
 	padding-left: 5px;
 }
 
@@ -21,10 +47,13 @@ body {
 
 div {
 	border: 2px solid #3b3b3b;
+	/*border: 2px solid white;*/
 	cursor: default;
 }
 .day {
 	margin-top: 3px;
+	margin-left: 2px;
+	margin-right: 2px;
 
 	display: inline-block;
 	width: 35px;
@@ -32,19 +61,23 @@ div {
 	text-align: center;
 	line-height: 30px;
 
-	user-select:none
+	user-select:none;
 }
+
 .curDay {
 	background: green;
 }
 .day:hover {
 	border-color: #757575;
 }
-.curDay.chosen {
-	border-color: red;
+.curDay.chosen.weekend {
+	border-color: red !important;
 }
-.chosen, .chosen:hover {
-	border-color: green;
+.curDay.weekend {
+	background: white;
+}
+.chosen, .chosen:hover{
+	border-color: white;
 }
 
 

@@ -9,70 +9,30 @@
 </head>
 <body>
 	<div style="text-align: center;">
-		<div id="calendar" style="display: inline-block; border: 1px solid;">
-			<div id="curDate">
-				<div id="time">18:37:40</div>
-				<div id="date" style="margin-top: 0">24 июня 2020 г.</div>
+		<div id="calendar">
+			<div>
+				<div id="curTime">18:37:40</div>
+				<div id="curDate" class="clickable" title="К текущему дню" style="margin-top: 0" onclick="toNowadays();">24 июня 2020 г.</div>
+			</div> <hr>
+			<div id="month" style="text-align: right; margin-top: 10px">
+				<span style="float: left; line-height: 26px; font-weight: bold;">Июнь 2020</span>
+				<input type="button" value="&and;" onclick="moveGrid(-1);">
+				<input type="button" value="&or;" onclick="moveGrid(1);">
 			</div>
-<!-- 			<div id="month">
-				<span>Июнь 2020</span>
-			</div> -->
-			<div id="days">
-				<div class="row">
-					<div class="day">1</div>
-					<div class="day">2</div>
-					<div class="day">3</div>
-					<div class="day">4</div>
-					<div class="day">5</div>
-					<div class="day weekend">6</div>
-					<div class="day weekend">7</div>
-				</div>
-				<div class="row">
-					<div class="day">8</div>
-					<div class="day">9</div>
-					<div class="day">10</div>
-					<div class="day">11</div>
-					<div class="day">12</div>
-					<div class="day weekend">13</div>
-					<div class="day weekend">14</div>
-				</div>
-				<div class="row">
-					<div class="day">15</div>
-					<div class="day">16</div>
-					<div class="day">17</div>
-					<div class="day">18</div>
-					<div class="day">19</div>
-					<div class="day weekend">20</div>
-					<div class="day weekend">21</div>
-				</div>
-				<div class="row">
-					<div class="day">22</div>
-					<div class="day">23</div>
-					<div class="day">24</div>
-					<div class="day curDay">25</div>
-					<div class="day">26</div>
-					<div class="day weekend">27</div>
-					<div class="day weekend">28</div>
-				</div>
-				<div class="row">
-					<div class="day">29</div>
-					<div class="day">30</div>
-					<div class="day">31</div>
-					<div class="day passive">1</div>
-					<div class="day passive">2</div>
-					<div class="day weekend passive">3</div>
-					<div class="day weekend passive">4</div>
-				</div>
-				<div class="row">
-					<div class="day passive">5</div>
-					<div class="day passive">6</div>
-					<div class="day passive">7</div>
-					<div class="day passive">8</div>
-					<div class="day passive">9</div>
-					<div class="day weekend passive">10</div>
-					<div class="day weekend passive">11</div>
-				</div>
+			<div id="weekday" style="margin-top: 6px;">
+				<span>Пн</span>
+				<span>Вт</span>
+				<span>Ср</span>
+				<span>Чт</span>
+				<span>Пт</span>
+				<span>Сб</span>
+				<span>Вс</span>
 			</div>
+			<div id="grid"></div>
+		</div>
+		<div class="clickable" title="К выбранному дню" onclick="toChosen();">
+			<span>Выбранная дата:</span>
+			<span id="inf">26.06.2020</span>
 		</div>
 	</div>
 </body>
