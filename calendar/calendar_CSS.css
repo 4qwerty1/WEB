@@ -41,7 +41,7 @@ input {
 	padding: 10px
 }
 #days {
-	margin-top: 5px;
+	margin-top: 5px;;
 }
 
 
@@ -87,4 +87,16 @@ div {
 }
 .passive {
 	color: 	#757575 !important;
+}
+
+
+.note:after {
+	content: '•';
+	color: white;
+	position: absolute;
+	font-size: 20px;
+	line-height: 10px;
+}
+.weekend.curDay.note:after {
+	color: red;
 }

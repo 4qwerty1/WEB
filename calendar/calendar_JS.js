@@ -4,32 +4,35 @@ var curDate = new Date(), chosenItem, chosenDay = new Date();
 var step = 0; //шаг в месяцах
 
 
-
 $(document).ready(function(){
 	makeDaysGrid();
 	moveGrid(0);
+	showNoteChosenItem();
 	setInterval(showCurTime);
 
 
 	$('.day').bind('click', function() {
+		saveNote(chosenDay);
+
 		if (chosenItem)
-			chosenItem.classList.remove('chosen');
+			chosenItem.removeClass('chosen');
 
 		$(this).addClass('chosen');
-		chosenItem = $(this)[0];
+		chosenItem = $(this);
 
-		var indent;
-		if (chosenItem.classList.contains("passive")) {
-			indent = (chosenItem.id.slice(1) < 6) ? -1 : 1;
+		var indent; //если chosenDay в этом месяце - 0, в прошлом - -1, в слудующем - 1
+		if (chosenItem.hasClass("passive")) {
+			indent = (chosenItem.attr('id').slice(1) < 6) ? -1 : 1;
 		} else {
 			indent = 0;
 		}
 		chosenDay = new Date();
 		chosenDay.setDate(1);
 		chosenDay.setMonth(chosenDay.getMonth() + step + indent);
-		chosenDay.setDate(chosenItem.innerHTML);
+		chosenDay.setDate(chosenItem.text());
 
 		$('#inf').text(char2(chosenDay.getDate()) + '.' + char2(chosenDay.getMonth()+1) + '.' + chosenDay.getFullYear());
+		showNoteChosenItem();
 	});
 });
 
@@ -66,10 +69,20 @@ function makeDaysGrid() {
 		row.appendTo(grid);
 	}
 }
+function clearGrid() {
+	var days = $('.day');
+
+	for (var i = 0; i < 42; i++) {
+		days.eq(i).removeClass('passive');
+		days.eq(i).removeClass('curDay');
+		days.eq(i).removeClass('chosen');
+		days.eq(i).removeClass('note');
+	}
+}
 function redrawGrid(month) {
 	var m = $('#month span').first();
 	m.text(rusMonth_Ip[month.getMonth()] + " " + month.getFullYear());
-
+	clearGrid();
 
 
 	var days = $('.day');
@@ -79,54 +92,54 @@ function redrawGrid(month) {
 	//заполнение дней этого месяца
 	var daysInMonth = numberOfDays(month);
 	for (var i = 0; i < daysInMonth; i++) {
-		days[start + i].innerHTML = i + 1;
-		days[start + i].classList.remove('passive');
-		days[start + i].classList.remove('curDay');
-		days[start + i].classList.remove('chosen');
+		days.eq(start + i).text(i + 1);
 	}
 
 	//заполнение пустых дней впереди
 	for (var i = start + daysInMonth; i < days.length; i++) {
-		days[i].innerHTML = i - start - daysInMonth + 1;
-		days[i].classList.add('passive');
+		days.eq(i).text(i - start - daysInMonth + 1);
+		days.eq(i).addClass('passive');
 	}
 	//заполнение пустых дней сзади
 	var dayInPreviousMonth = numberOfPreviousDays(month);
 	for (var i = start - 1; i >= 0; i--) {
-		days[i].innerHTML = dayInPreviousMonth;
+		days.eq(i).text(dayInPreviousMonth);
+		days.eq(i).addClass('passive');
 		dayInPreviousMonth--;
-		days[i].classList.add('passive');
 	}
 
 	//отмечаем текущий день
 	if (month.getMonth() == curDate.getMonth() && month.getFullYear() == curDate.getFullYear())
-		days[start + curDate.getDate() - 1].classList.add('curDay');
+		days.eq(start + curDate.getDate() - 1).addClass('curDay');
 
 	//отмечеам выбранный день
 	dayInPreviousMonth = numberOfPreviousDays(month);
-	switch (chosenInGrid(month)) {
+	switch (isChosenDateInGrid(month)) {
 		//предыдущий месяц
 		case -1:
-		days[start - dayInPreviousMonth + chosenDay.getDate() - 1].classList.add('chosen');
-		chosenItem = days[start - dayInPreviousMonth + chosenDay.getDate() - 1];
+		days.eq(start - dayInPreviousMonth + chosenDay.getDate() - 1).addClass('chosen');
+		chosenItem = days.eq(start - dayInPreviousMonth + chosenDay.getDate() - 1);
 		break;
 
 		//текущий месяц
 		case 0:
-		days[start + chosenDay.getDate() - 1].classList.add('chosen');
-		chosenItem = days[start + chosenDay.getDate() - 1];
+		days.eq(start + chosenDay.getDate() - 1).addClass('chosen');
+		chosenItem = days.eq(start + chosenDay.getDate() - 1);
 		break;
 
 		//следующий месяц
 		case 1:
-		days[start + daysInMonth + chosenDay.getDate() - 1].classList.add('chosen');
-		chosenItem = days[start + daysInMonth + chosenDay.getDate() - 1];
-
+		days.eq(start + daysInMonth + chosenDay.getDate() - 1).addClass('chosen');
+		chosenItem = days.eq(start + daysInMonth + chosenDay.getDate() - 1);
 	}
+
+	showMonthNotes();
 }
 
 
 function moveGrid(a) {
+	saveNote(chosenDay);
+
 	step += a;
 
 	var buff = new Date();
@@ -142,7 +155,7 @@ function toNowadays() {
 
 	redrawGrid(buff);
 }
-function toChosen() {
+function toChosenDate() {
 	step = chosenDay.getMonth() - curDate.getMonth() + 12 * (chosenDay.getFullYear() - curDate.getFullYear());
 
 	var buff = new Date(chosenDay);
@@ -150,7 +163,7 @@ function toChosen() {
 
 	redrawGrid(buff);
 }
-function chosenInGrid(month) {
+function isChosenDateInGrid(month) {
 	var buff = new Date(month);
 	buff.setDate(1);
 
@@ -198,4 +211,120 @@ function char2(str) {
 	str = str.toString();
 	str = (str.length == 2) ? str : '0' + str;
 	return str;
+}
+
+
+
+var Notes = [
+{
+	day: '27.5.2020', //today
+	text: 'first note',
+},
+{
+	day: '24.5.2020',
+	text: 'test note',
+}
+];
+
+//показывет точки на сетке
+function showMonthNotes(month) {
+	var days = $('.day');
+	for (var i = 0; i < 42; i++) {
+		var d = getDateFromCell(days.eq(i));
+		addNoteToCell(d, days.eq(i));
+	}
+}
+
+//показывает заметку выбранного дня
+function showNoteChosenItem() {
+	var textarea = $('#note');
+	if (chosenItem.hasClass('note')) {
+		for (var i of Notes) {
+			if (i.day == `${chosenDay.getDate()}.${chosenDay.getMonth()}.${chosenDay.getFullYear()}`) {
+				textarea.prop('value', i.text);
+				return;
+			}
+		}
+	} else {
+		textarea.prop('value', '');
+	}
+}
+
+//добавляет "точку" к ячейке
+function addNoteToCell(date, cell) {
+	for (var i of Notes) {
+		if (i.day == `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`) {
+			cell.addClass('note');
+			return;
+		}
+	}
+}
+//добавть эту функцию при смене выранной даты/месяца/нажатию кнопки
+function saveNote(date) {
+	var textarea = $('#note');
+	if (textarea.prop('value').length > 0) {
+		//изменение существующей заметки
+		for (var i of Notes) {
+			if (i.day == `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`) {
+				i.text = textarea.prop('value');
+				return;
+			}
+		}
+
+		//добавление новой заметки
+		Notes.push({
+			day: `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`,
+			text: textarea.prop('value'),
+		});
+		getCellFromDate(date).addClass('note');
+	} else {
+		//удаление заметки
+		var cell = getCellFromDate(date);
+		cell.removeClass('note');
+
+		for (var i = 0; i < Notes.length; i++) {
+			if (Notes[i].date == `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`) {
+				Notes.splice(i,1);
+				return;
+			}
+		}
+	}
+}
+
+function getDateFromCell(cell) {
+	var month = new Date();
+	month.setDate(1);
+	month.setMonth(month.getMonth() + step);
+
+	var start = (6 + month.getDay()) % 7;
+	var n = Number(cell.attr('id').slice(1));
+
+	//предыдущий месяц
+	if (n < start) {
+		month.setMonth(month.getMonth() - 1);
+		month.setDate(numberOfDays(month) - start + n + 1);
+
+		return month;
+	}
+
+	//показанный месяц
+	if (n >= start && n < start + numberOfDays(month)) {
+		month.setDate(n - start + 1);
+		return month;
+	}
+
+	//слудеющий месяц
+	if (n >= start + numberOfDays(month)) {
+		month.setDate(n - start + 1);
+		return month;
+	}
+}
+function getCellFromDate(date) {
+	var days = $('.day');
+
+	var buff = new Date(date);
+	buff.setDate(1);
+	var start = (6 + buff.getDay()) % 7;
+
+	return days.eq(start + date.getDate() - 1);
 }
