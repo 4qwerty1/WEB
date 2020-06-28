@@ -217,7 +217,7 @@ function char2(str) {
 
 var Notes = [
 {
-	day: '27.5.2020', //today
+	day: '26.5.2020',
 	text: 'first note',
 },
 {
@@ -259,7 +259,7 @@ function addNoteToCell(date, cell) {
 		}
 	}
 }
-//добавть эту функцию при смене выранной даты/месяца/нажатию кнопки
+
 function saveNote(date) {
 	var textarea = $('#note');
 	if (textarea.prop('value').length > 0) {
