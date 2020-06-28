@@ -1,7 +1,26 @@
-var canvas = document.getElementById('canvas'), ctx, gun, g = 10, idTimer, enemiesTimer, enemies = [];
-var bullets = [], pause = true, level = 1, maxEnemesInTime = 10, countEn = 0, maxLevel = 10;
-var shotTB1 = Date.now(), shotTB2 = Date.now(), reloadB1 = 100, reloadB2 = 100, userHealth = 3;
-var userName, score = 0, players = [], Player = null;
+var canvas = document.getElementById('canvas');
+var ctx;
+var gun;
+var g = 10;
+var idTimer;
+var enemiesTimer;
+var enemies = [];
+var bullets = [];
+var pause = true;
+var level = 1;
+var maxEnemesInTime = 10;
+var countEn = 0;
+var maxLevel = 10;
+var shotTB1 = Date.now();
+var shotTB2 = Date.now();
+var reloadB1 = 100;
+var reloadB2 = 100;
+var userHealth = 3;
+var userName;
+var score = 0;
+var players = [];
+var Player = null;
+
 Gun = new Class({
 	length: 40,
 	corner: Math.PI / 4,
@@ -497,6 +516,7 @@ function goInput(event) {
 		if (reloadB1 == 100 && !pause) {
 			shotTB1 = Date.now();
 			reloadB1 = 0;
+			// bullets.push(new Bullet1());
 			bullets.push(new Bullet1());
 		}
 	}
@@ -559,7 +579,10 @@ function restart() {
 	startPlay();
 }
 function changePlayer() {
-	userName = prompt("Введите ваше имя:", 'Tom');
+	userName = '';
+	while (!userName)
+		userName = prompt("Введите ваше имя:", 'Tom');
+
 	if (Player)
 		setLocalStorage();
 
@@ -623,5 +646,3 @@ function rewriteResultTable() {
 
 	document.getElementsByTagName('div')[0].insertBefore(table, document.getElementById('buttons'));
 }
-
-
