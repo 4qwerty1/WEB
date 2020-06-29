@@ -175,7 +175,7 @@ Enemy = new Class({
 	img: null,
 	initialize: function(type) {
 		//type == 1 - слабые, type == 2 - сильные
-		this.width = 30 + Math.random() * 40;
+		this.width = 40 + Math.random() * 40;
 		this.height = this.width;
 
 		this.x = canvas.width - 10;
@@ -259,14 +259,22 @@ function reloadWindow() {
 	}	
 }
 function createEnemeis() {
-	let chanse = Math.floor( Math.random() * Math.min(6 + level, maxEnemesInTime));
-	if (chanse >= 4) {
-		let x = 1 + Math.floor( Math.random() * (2 + level));
-		for (let i = 0; i < x; i++) {
-			countEn++;
-			enemies.push(new Enemy(1 + Math.floor(Math.random() * 2)));
+	var buff_en = [];
+	while (buff_en.length <= Math.floor(level / 3)) {
+		countEn++;
+
+		let en = new Enemy(1 + Math.floor(Math.random() * 2));
+		buff_en.push(en);
+		for (var j = 1; j < buff_en.length; j++) {
+			if (crossRectRect(buff_en[j - 1], buff_en[j])) {
+				buff_en.splice(j,1);
+				countEn--;
+			}
 		}
 	}
+
+	for (var i of buff_en)
+		enemies.push(i);
 	levelUp();
 }
 function levelUp() {
@@ -377,12 +385,6 @@ function Hit(bullet) {
 			}
 		}
 	}
-	return false;
-}
-function crossBallBall(f1, f2) {
-	let s = Math.sqrt(Math.pow(f1.x - f2.x, 2) + Math.pow(f1.y - f2.y, 2));
-	if (s < f2.radius + f1.radius) 
-		return true;
 	return false;
 }
 function crossBallRect(ball, rect) {
@@ -522,7 +524,7 @@ function startPlay() {
 	clearInterval(enemiesTimer);
 	pause = false;
 	idTimer = setInterval('reloadWindow();', 50);
-	enemiesTimer = setInterval('createEnemeis();', 1000);
+	enemiesTimer = setInterval('createEnemeis();', 1500);
 
 	rewriteResultTable();
 }
