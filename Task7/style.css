@@ -1,0 +1,54 @@
+body {
+	font-family: Arial;
+	background: #87BCDE;
+}
+th, td{
+	width: 60px;
+	text-align: center;
+	border: 1px solid black;
+}
+table {
+	border: 1px solid black;
+	display: inline-block;
+}
+
+input[type='button'] {
+	outline: none;
+	cursor: pointer;
+	user-select: none;
+}
+
+#canvas {
+	margin-left: 20px;
+}
+#pauseScreen {
+	position: absolute;
+	top: 8px;
+	left: 28px;
+	width: 800px;
+	height: 400px;
+
+	background: rgba(255,0,0,0.3);
+	text-align: center;
+}
+#pauseScreen div{
+	position: absolute;
+	top: 30%;
+	margin-top: -0.625em;
+
+	width: inherit;
+
+	font-weight: bold;
+	font-size: 30px;
+}
+#tryAgain {
+	color: white;
+	background: red;
+	border: none;
+	border-radius: 10px;
+
+	height: 30px;
+	width: 120px;
+
+	font-size: 20px;
+}
