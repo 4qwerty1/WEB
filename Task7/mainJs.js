@@ -41,27 +41,41 @@ back.src = 'background.jpg';
 
 
 Gun = new Class({
-	length: 40,
+	length: 60,
 	corner: Math.PI / 4,
 	color: 'black',
+
+	startY: 337,
+	startX: 30,
 
 	initialize: function() {
 		this.draw();
 	},
 	aim: function(pX, pY) {
 		pX = Math.max(pX, 0);
-		this.corner = Math.atan((canvas.height - pY) / pX);
+		this.corner = Math.atan(Math.max(this.startY - pY, 0) / Math.max(pX - this.startX, 0));
 	},
 	draw: function() {
+
+		ctx.save()
 		ctx.fillStyle = this.color;
-		ctx.lineWidth = 20;
+		ctx.lineWidth = 30;
+		ctx.lineCap = 'round';
 
 		ctx.beginPath();
-		ctx.moveTo(0, canvas.height);
-		ctx.lineTo(this.length * Math.cos(this.corner), canvas.height - this.length * Math.sin(this.corner));
+		ctx.moveTo(this.startX, this.startY);
+		ctx.lineTo(this.startX + this.length * Math.cos(this.corner), 
+			this.startY - this.length * Math.sin(this.corner));
 		ctx.stroke();
 
-		ctx.lineWidth = 1;
+
+		ctx.fillStyle = 'grey';
+		ctx.beginPath();
+		ctx.arc(this.startX, this.startY + 10, 30, 0, 2*Math.PI, false);
+		ctx.closePath();
+		ctx.fill();
+
+		ctx.restore();
 	},
 });
 
@@ -78,8 +92,8 @@ Bullet = new Class({
 	lastX: 0,
 	lastY: 0,
 	initialize: function() {
-		this.x = gun.length * Math.cos(gun.corner);
-		this.y = canvas.height - gun.length * Math.sin(gun.corner);
+		this.x = gun.startX +  gun.length * Math.cos(gun.corner);
+		this.y = gun.startY - gun.length * Math.sin(gun.corner);
 		this.corner = gun.corner;
 
 		this.aX = this.speed * Math.cos(this.corner);
@@ -165,7 +179,7 @@ Enemy = new Class({
 		this.height = this.width;
 
 		this.x = canvas.width - 10;
-		this.y = 30 + Math.random() * (canvas.height - 65 - this.width);
+		this.y = 30 + Math.random() * (canvas.height - 95 - this.width);
 
 		if (type == 1)
 			this.img = planeSprites[Math.floor(Math.random() * planeSprites.length)];
@@ -327,7 +341,7 @@ function drawHeart(x, y, width) {
 
 
 function isAbroad(shape) {
-	var x = shape.x > canvas.width || shape.x < 0 || shape.y < 0 || shape.y > canvas.height;
+	var x = shape.x > canvas.width || shape.x < 0 || shape.y > canvas.height;
 	return x;
 }
 function Hit(bullet) {
@@ -497,8 +511,10 @@ function rightClick() {
 	}
 }
 function startPlay() {
-	if (gameOver)
+	if (gameOver) {
 		Player.value = 0;
+		clearWindow();
+	}
 
 	removeGameOverScreen();
 
@@ -536,10 +552,9 @@ function endGame() {
 	stopPlay();
 	showGameOverScreen();
 
-	clearWindow();
+	// clearWindow();
 
 	setLocalStorage();
-	// Player.value = 0;
 }
 function restart() {
 	clearWindow();

@@ -10,7 +10,8 @@
 <body onload="init();" onunload="setLocalStorage();" style="user-select:none">
 	<div id="pauseScreen" style="display: none">
 		<div>
-			<h1 style="margin-bottom: 5px">Game over!</h1>
+			<!-- <h1 style="margin-bottom: 5px">Game over!</h1> -->
+			<img src="plane_sprites/textGameOver.png" style="display: block; margin-left: auto; margin-right: auto">
 			<input id="tryAgain" type="button" value="Try again" onclick="restart();">
 		</div>
 	</div>
@@ -39,7 +40,7 @@
 		</tr>
 	</table>
 	<table id="results"></table>
-	<form id="buttons">
+	<form id="buttons" style="margin-left: 20px; margin-top: 10px">
 		<input type="button" value="Play" onclick="startPlay();">
 		<input type="button" value="Pause" onclick="stopPlay();">
 		<input type="button" value="Restart" onclick="restart();">
