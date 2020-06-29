@@ -160,7 +160,7 @@ Bullet2 = new Class({
 	Extends: Bullet,
 	color: 'red',
 	speed: 55,
-	damage: 2,
+	damage: 3,
 });
 
 Enemy = new Class({
