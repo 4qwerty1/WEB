@@ -7,6 +7,7 @@ var enemiesTimer;
 var enemies = [];
 var bullets = [];
 var pause = true;
+var gameOver = false;
 var level = 1;
 var maxEnemesInTime = 10;
 var countEn = 0;
@@ -20,6 +21,24 @@ var userName;
 var score = 0;
 var players = [];
 var Player = null;
+
+//images
+var alienSprites = [];
+for (let i = 0; i < 4; i++) {
+	let en = new Image();
+	en.src = `alien_sprites/_${i + 1}.png`;
+	alienSprites.push(en)
+}
+var planeSprites = [];
+for (let i = 0; i < 3; i++) {
+	let en = new Image();
+	en.src = `plane_sprites/_${i + 1}.png`;
+	planeSprites.push(en);
+}
+var back = new Image();
+back.src = 'background.jpg';
+
+
 
 Gun = new Class({
 	length: 40,
@@ -133,61 +152,39 @@ Bullet2 = new Class({
 Enemy = new Class({
 	x: 0,
 	y: 0,
-	color: "rgb(0,0,0)",
+	width: 0,
+	height: 0,
 	maxHealth: 0,
-	initialize: function() {
+	speed: 1,
+	
+	health: 0,
+	img: null,
+	initialize: function(type) {
+		//type == 1 - слабые, type == 2 - сильные
+		this.width = 30 + Math.random() * 40;
+		this.height = this.width;
+
 		this.x = canvas.width - 10;
-		this.y = 30 + Math.random() * (canvas.height - 50);
-		this.color = 'rgb('+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+','+Math.floor(Math.random()*256)+')';
+		this.y = 30 + Math.random() * (canvas.height - 65 - this.width);
+
+		if (type == 1)
+			this.img = planeSprites[Math.floor(Math.random() * planeSprites.length)];
+		else
+			this.img = alienSprites[Math.floor(Math.random() * alienSprites.length)];
+
+		this.health = type + Math.floor(level / 2);
 		this.maxHealth = this.health;
+
+		this.speed = (type == 1) ? 2 : 1;
 	},
 	move: function() {
 		this.x -= this.speed + level;
 	},
-});
-Ball = new Class({
-	Extends: Enemy,
-	speed: 2,
-	radius: 0,
-	health: 1,
-	name: 'ball',
-	initialize: function() {
-		this.radius = 15 + Math.random() * 20;
-		this.health += Math.floor(level / 2);
-		this.parent();
-	},
-	draw: function () {
-		ctx.beginPath();
-		ctx.fillStyle = this.color;
-		ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI, false);
-		ctx.fill();
-		ctx.fillStyle = 'black';
-		ctx.stroke();
-		ctx.closePath();
-	}
-});
-Rect = new Class({
-	Extends: Enemy,
-	speed: 1,
-	widht: 0,
-	height: 0,
-	health: 2,
-	name: 'rect',
-	initialize: function() {
-		this.width = 30 + Math.random() * 40;
-		this.height = this.width;
-		this.health += Math.floor(level / 2);
-		this.parent();
-	},
 	draw: function() {
-		ctx.beginPath();
-		ctx.fillStyle = this.color;
-		ctx.fillRect(this.x, this.y, this.width, this.width);
-		ctx.fillStyle = 'black';
-		ctx.strokeRect(this.x, this.y, this.width, this.width);
-		ctx.closePath();
+		ctx.drawImage(this.img, this.x, this.y, this.width, this.width);
 	}
 });
+
 function init() {
 	canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
@@ -201,11 +198,8 @@ function init() {
 }
 function clearCanvas() {
 	ctx.save(); //Сохраняет текущее состояние стилей рисования, используя для этого стек
-	var g = ctx.createLinearGradient(0, 0, 0, canvas.height); //Создает линейный градиент вдоль линии, задаваемой координатами
-	g.addColorStop(1, '#87BCDE'); //опорные точки определяющие цвет //col1 - цвет, 0 - начало градиента, 1 - конец
-	g.addColorStop(0, '#CAECF9');
-	ctx.fillStyle = g;
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.drawImage(back, 0, 0);
 	ctx.restore();
 }
 function mouseMove(event) {
@@ -256,17 +250,7 @@ function createEnemeis() {
 		let x = 1 + Math.floor( Math.random() * (2 + level));
 		for (let i = 0; i < x; i++) {
 			countEn++;
-			switch(Math.floor(Math.random() * 2)) {
-				case (0):
-				enemies.push(new Ball());
-				break;
-				case (1):
-				enemies.push(new Rect());
-				break;
-				default:
-				alert('smth wrong');
-			}
-
+			enemies.push(new Enemy(1 + Math.floor(Math.random() * 2)));
 		}
 	}
 	levelUp();
@@ -355,50 +339,27 @@ function Hit(bullet) {
 	};
 
 	for (let enemy of enemies) {
-		// enemy.draw();
-		if (enemy.name == 'ball') {
-			if (crossBallRect(enemy, rect)) {
-				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius);
-				for (let i = 1; i < count; i++) {
-					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
-					let bX = rect.x + i * rect.width / count; //координата x на отрезке
-					let bY = rect.y + rect.height * (1/2 + m/2);
-					bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
+		if (crossRectRect(enemy, rect) || crossBallRect(bullet, enemy)) {
+			let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
+			for (let i = 1; i < count; i++) {
+				let m = (bullet.y - bullet.lastY > 0) ? -1 : 1; //летит вверх или вниз
+				let bX = rect.x + i * rect.width / count; //координата x на отрезке
+				let bY = rect.y + rect.height * (1/2 + m/2);
+				bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
 
-					let tmpBullet = {
-						x: bX,
-						y: bY,
-						radius: bullet.radius,
-					};
-					if (crossBallBall(enemy, tmpBullet)){
-						enemy.health -= bullet.damage;
-						return true;
-					}
-				}
-			}
-		} else {
-			if (crossRectRect(enemy, rect) || crossBallRect(bullet, enemy)) {
-				let count = Math.round(Math.max(rect.width, rect.height) / bullet.radius / 2);
-				for (let i = 1; i < count; i++) {
-					let m = (bullet.y - bullet.lastY > 0) ? -1 : 1;
-					let bX = rect.x + i * rect.width / count; //координата x на отрезке
-					let bY = rect.y + rect.height * (1/2 + m/2);
-					bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
-
-					let tmpBullet = {
-						x: bX,
-						y: bY,
-						radius: bullet.radius,
-					};
-					if (crossBallRect(tmpBullet, enemy)){
-						enemy.health -= bullet.damage;
-						return true;
-					}
-				}
-				if (crossBallRect(bullet, enemy)) {
+				let tmpBullet = {
+					x: bX,
+					y: bY,
+					radius: bullet.radius,
+				};
+				if (crossBallRect(tmpBullet, enemy)){
 					enemy.health -= bullet.damage;
 					return true;
 				}
+			}
+			if (crossBallRect(bullet, enemy)) {
+				enemy.health -= bullet.damage;
+				return true;
 			}
 		}
 	}
@@ -462,7 +423,7 @@ function isLineCrossed(a, b, c, d) {
 }
 function getLines(f) {
 	let lines = [];
-	
+
 	let a = {
 		x: f.x,
 		y: f.y,
@@ -503,7 +464,7 @@ function isInside(f1, f2) {
 
 	if (max.y > min.y && max.x - min.x < min.width && max.y - min.y < min.height)
 		return true;
-	
+
 	return false;
 }
 
@@ -520,13 +481,13 @@ function goInput(event) {
 			bullets.push(new Bullet1());
 		}
 	}
-	else if (event.which == 3) {
-		if (reloadB2 == 100 && !pause) {
-			shotTB2 = Date.now();
-			reloadB2 = 0;
-			bullets.push(new Bullet2());
-		}
-	}
+	// else if (event.which == 3) {
+	// 	if (reloadB2 == 100 && !pause) {
+	// 		shotTB2 = Date.now();
+	// 		reloadB2 = 0;
+	// 		bullets.push(new Bullet2());
+	// 	}
+	// }
 }
 function rightClick() {
 	if (reloadB2 == 100) {
@@ -536,6 +497,11 @@ function rightClick() {
 	}
 }
 function startPlay() {
+	if (gameOver)
+		Player.value = 0;
+
+	removeGameOverScreen();
+
 	clearInterval(idTimer);
 	clearInterval(enemiesTimer);
 	pause = false;
@@ -563,14 +529,17 @@ function clearWindow() {
 	reloadWindow();
 }
 
+
+
+
 function endGame() {
 	stopPlay();
-	alert('You lose!');
+	showGameOverScreen();
 
 	clearWindow();
 
 	setLocalStorage();
-	Player.value = 0;
+	// Player.value = 0;
 }
 function restart() {
 	clearWindow();
@@ -591,7 +560,23 @@ function changePlayer() {
 	clearWindow();
 	getLocalStorage();
 	rewriteResultTable();
+
+	startPlay();
 }
+function showGameOverScreen() {
+	var screen = document.getElementById('pauseScreen');
+	screen.style.display = '';
+
+	gameOver = true;
+}
+function removeGameOverScreen() {
+	var screen = document.getElementById('pauseScreen');
+	screen.style.display = 'none';
+
+	gameOver = false;
+}
+
+
 
 
 function getLocalStorage() {
@@ -644,5 +629,5 @@ function rewriteResultTable() {
 		}
 	}
 
-	document.getElementsByTagName('div')[0].insertBefore(table, document.getElementById('buttons'));
+	document.body.insertBefore(table, document.getElementById('buttons'));
 }

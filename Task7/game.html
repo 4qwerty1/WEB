@@ -3,57 +3,48 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Game</title>
+	<link rel="stylesheet" href="style.css">
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mootools/1.6.0/mootools-core.js"></script>
 	<script type="text/javascript" src="mainJs.js"></script>
-	<style>
-		div {
-			margin-left: 20px;
-		}
-		th, td{
-			width: 60px;
-			text-align: center;
-			border: 1px solid black;
-		}
-		table {
-			border: 1px solid black;
-			display: inline-block;
-		}
-	</style>
 </head>
 <body onload="init();" onunload="setLocalStorage();" style="user-select:none">
-	<div>
-		<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"
-		oncontextmenu="rightClick();return false"></canvas>
-		<table id="inform">
-			<tr>
-				<th>Снаряд 1</th>
-				<td id="bullet1">READY</td>
-			</tr>
-			<tr>
-				<th>Снаряд 2</th>
-				<td id="bullet2">READY</td>
-			</tr>
-			<tr>
-				<th>Уровень</th>
-				<td id="level">1</td>
-			</tr>
-			<tr>
-				<th>Кол-во врагов</th>
-				<td id="enemies">0</td>
-			</tr>
-			<tr>
-				<th>Счет:</th>
-				<td id="score">0</td>
-			</tr>
-		</table>
-		<table id="results"></table>
-		<form id="buttons">
-			<input type="button" value="Play" onclick="startPlay();">
-			<input type="button" value="Pause" onclick="stopPlay();">
-			<input type="button" value="Restart" onclick="restart();">
-			<input type="button" value="Change a player" onclick="changePlayer();">
-		</form>
+	<div id="pauseScreen" style="display: none">
+		<div>
+			<h1 style="margin-bottom: 5px">Game over!</h1>
+			<input id="tryAgain" type="button" value="Try again" onclick="restart();">
+		</div>
 	</div>
+	<canvas id="canvas" width="800" height="400" onclick="goInput(event);" onmousemove="mouseMove(event);"
+	oncontextmenu="rightClick();return false"></canvas>
+	<table id="inform">
+		<tr>
+			<th>Снаряд 1</th>
+			<td id="bullet1">READY</td>
+		</tr>
+		<tr>
+			<th>Снаряд 2</th>
+			<td id="bullet2">READY</td>
+		</tr>
+		<tr>
+			<th>Уровень</th>
+			<td id="level">1</td>
+		</tr>
+		<tr>
+			<th>Кол-во врагов</th>
+			<td id="enemies">0</td>
+		</tr>
+		<tr>
+			<th>Счет:</th>
+			<td id="score">0</td>
+		</tr>
+	</table>
+	<table id="results"></table>
+	<form id="buttons">
+		<input type="button" value="Play" onclick="startPlay();">
+		<input type="button" value="Pause" onclick="stopPlay();">
+		<input type="button" value="Restart" onclick="restart();">
+		<input type="button" value="Change a player" onclick="changePlayer();">
+	</form>
 
 </body>
 </html>
