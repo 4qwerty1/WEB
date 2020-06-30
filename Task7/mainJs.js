@@ -1,18 +1,19 @@
 var canvas = document.getElementById('canvas');
 var ctx;
 var gun;
-var idTimer;
-var enemiesTimer;
+var idTimer; //таймер основного действия игры
+var enemiesTimer;  //таймер генерации врагов
 var enemies = [];
 var bullets = [];
-var pause = true;
-var gameOver = false;
+
+var pause = true; //находится ли игра на паузе
+var gameOver = false; //завершилась ли игра
 var level = 1;
-var maxEnemesInTime = 10;
+
 var countEn = 0;
-var maxLevel = 10;
-var shotTB1 = Date.now();
-var shotTB2 = Date.now();
+var shotTB1 = Date.now(); //время выстрела bullet1
+var shotTB2 = Date.now(); //время выстрела bullet2
+
 var reloadB1 = 100;
 var reloadB2 = 100;
 var userHealth = 3;
@@ -22,19 +23,19 @@ var players = [];
 var Player = null;
 
 //images
+var back = new Image();
 var alienSprites = [];
+var planeSprites = [];
 for (let i = 0; i < 4; i++) {
 	let en = new Image();
 	en.src = `alien_sprites/_${i + 1}.png`;
 	alienSprites.push(en)
 }
-var planeSprites = [];
 for (let i = 0; i < 3; i++) {
 	let en = new Image();
 	en.src = `plane_sprites/_${i + 1}.png`;
 	planeSprites.push(en);
 }
-var back = new Image();
 back.src = 'background.jpg';
 
 
@@ -163,6 +164,7 @@ Enemy = new Class({
 	}
 });
 
+//функции работы игры
 function init() {
 	canvas = document.getElementById('canvas');
 	if (canvas.getContext) {
@@ -174,20 +176,77 @@ function init() {
 		startPlay();
 	}
 }
+function startPlay() {
+	if (gameOver) {
+		Player.value = 0;
+		clearWindow();
+	}
+
+	removeGameOverScreen();
+
+	clearInterval(idTimer);
+	clearInterval(enemiesTimer);
+	pause = false;
+	idTimer = setInterval('reloadWindow();', 50);
+	enemiesTimer = setInterval('createEnemeis();', 1500);
+
+	rewriteResultTable();
+}
+function stopPlay() {
+	pause = true;
+	clearInterval(idTimer);
+	clearInterval(enemiesTimer);
+}
+function endGame() {
+	stopPlay();
+	showGameOverScreen();
+
+	setLocalStorage();
+}
+function restart() {
+	clearWindow();
+	Player.value = 0;
+
+	startPlay();
+}
+function changePlayer() {
+	userName = '';
+	while (!userName)
+		userName = prompt("Введите ваше имя:", 'Tom');
+
+	if (Player)
+		setLocalStorage();
+
+	players = [];
+	Player = null;
+	clearWindow();
+	getLocalStorage();
+	rewriteResultTable();
+
+	startPlay();
+}
+function clearWindow() {
+	enemies = [];
+	bullets = [];
+	level = 1;
+	countEn = 0;
+	reloadB1 = 100;
+	reloadB2 = 100;
+	userHealth = 3;
+	score = 0;
+	levelUp();
+	scoreUp();
+	reloadWindow();
+}
+
+
+
+//функции для работы с canvas
 function clearCanvas() {
-	ctx.save(); //Сохраняет текущее состояние стилей рисования, используя для этого стек
+	ctx.save();
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.drawImage(back, 0, 0);
 	ctx.restore();
-}
-function mouseMove(event) {
-	if (canvas) {
-		var elem = canvas.getBoundingClientRect();
-
-		var x = event.clientX - elem.x;
-		var y = event.clientY - elem.y;
-		gun.aim(x, y);
-	}
 }
 function reloadWindow() {
 	clearCanvas();
@@ -222,49 +281,6 @@ function reloadWindow() {
 		}
 	}	
 }
-function createEnemeis() {
-	var buff_en = [];
-	while (buff_en.length <= Math.floor(level / 3)) {
-		countEn++;
-
-		let en = new Enemy(1 + Math.floor(Math.random() * 2));
-		buff_en.push(en);
-		for (var j = 1; j < buff_en.length; j++) {
-			if (crossRectRect(buff_en[j - 1], buff_en[j])) {
-				buff_en.splice(j,1);
-				countEn--;
-			}
-		}
-	}
-
-	for (var i of buff_en)
-		enemies.push(i);
-	levelUp();
-}
-function levelUp() {
-	level = Math.min(1 + Math.floor(countEn / 30), maxLevel);
-	document.getElementById('level').innerHTML = level;
-	document.getElementById('enemies').innerHTML = countEn;
-}
-function scoreUp(enemy) {
-	if (enemy && enemy.health <= 0) {
-		score += enemy.maxHealth;
-
-		Player.value = score;
-		rewriteResultTable();
-	}
-	document.getElementById('score').innerHTML = score;
-}
-function reloadBullets() {
-	let x = document.getElementById('bullet1');
-	reloadB1 = Math.min(100, reloadB1 + Math.round((Date.now() - shotTB1) / 10));
-	x.innerHTML = (reloadB1 == 100) ? 'READY' : reloadB1;
-
-	x = document.getElementById('bullet2');
-	reloadB2 = Math.min(100, reloadB2 + Math.round((Date.now() - shotTB2) / 100));
-	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
-}
-
 var heartbeat = 0;
 function showUserHealth() {
 	let size = 20;
@@ -309,9 +325,67 @@ function drawHeart(x, y, width) {
 	ctx.closePath();
 	ctx.restore();
 }
+function showGameOverScreen() {
+	var screen = document.getElementById('pauseScreen');
+	screen.style.display = '';
+
+	gameOver = true;
+}
+function removeGameOverScreen() {
+	var screen = document.getElementById('pauseScreen');
+	screen.style.display = 'none';
+
+	gameOver = false;
+}
 
 
 
+//для работы программы
+function createEnemeis() {
+	var buff_en = [];
+	while (buff_en.length <= Math.floor(level / 3)) {
+		countEn++;
+
+		let en = new Enemy(1 + Math.floor(Math.random() * 2));
+		buff_en.push(en);
+		for (var j = 1; j < buff_en.length; j++) {
+			if (crossRectRect(buff_en[j - 1], buff_en[j])) {
+				buff_en.splice(j,1);
+				countEn--;
+			}
+		}
+	}
+
+	for (var i of buff_en)
+		enemies.push(i);
+	levelUp();
+}
+function levelUp() {
+	level = Math.min(1 + Math.floor(countEn / 30), 10); //уровень может быть не более 10
+	document.getElementById('level').innerHTML = level;
+	document.getElementById('enemies').innerHTML = countEn;
+}
+function scoreUp(enemy) {
+	if (enemy && enemy.health <= 0) {
+		score += enemy.maxHealth;
+
+		Player.value = score;
+		rewriteResultTable();
+	}
+	document.getElementById('score').innerHTML = score;
+}
+function reloadBullets() {
+	let x = document.getElementById('bullet1');
+	reloadB1 = Math.min(100, reloadB1 + Math.round((Date.now() - shotTB1) / 10));
+	x.innerHTML = (reloadB1 == 100) ? 'READY' : reloadB1;
+
+	x = document.getElementById('bullet2');
+	reloadB2 = Math.min(100, reloadB2 + Math.round((Date.now() - shotTB2) / 100));
+	x.innerHTML = (reloadB2 == 100) ? 'READY' : reloadB2;
+}
+
+
+//для проверки
 function isAbroad(shape) {
 	var x = shape.x > canvas.width || shape.x < 0 || shape.y > canvas.height;
 	return x;
@@ -451,7 +525,7 @@ function isInside(f1, f2) {
 
 
 
-
+//инпуты пользователя
 function goInput(event) {
 	if (event.which == 1) {
 		if (reloadB1 == 100 && !pause) {
@@ -468,88 +542,18 @@ function rightClick() {
 		bullets.push(new Bullet2());
 	}
 }
-function startPlay() {
-	if (gameOver) {
-		Player.value = 0;
-		clearWindow();
+function mouseMove(event) {
+	if (canvas) {
+		var elem = canvas.getBoundingClientRect();
+
+		var x = event.clientX - elem.x;
+		var y = event.clientY - elem.y;
+		gun.aim(x, y);
 	}
-
-	removeGameOverScreen();
-
-	clearInterval(idTimer);
-	clearInterval(enemiesTimer);
-	pause = false;
-	idTimer = setInterval('reloadWindow();', 50);
-	enemiesTimer = setInterval('createEnemeis();', 1500);
-
-	rewriteResultTable();
-}
-function stopPlay() {
-	pause = true;
-	clearInterval(idTimer);
-	clearInterval(enemiesTimer);
-}
-function clearWindow() {
-	enemies = [];
-	bullets = [];
-	level = 1;
-	countEn = 0;
-	reloadB1 = 100;
-	reloadB2 = 100;
-	userHealth = 3;
-	score = 0;
-	levelUp();
-	scoreUp();
-	reloadWindow();
 }
 
 
-
-
-function endGame() {
-	stopPlay();
-	showGameOverScreen();
-
-	setLocalStorage();
-}
-function restart() {
-	clearWindow();
-	Player.value = 0;
-
-	startPlay();
-}
-function changePlayer() {
-	userName = '';
-	while (!userName)
-		userName = prompt("Введите ваше имя:", 'Tom');
-
-	if (Player)
-		setLocalStorage();
-
-	players = [];
-	Player = null;
-	clearWindow();
-	getLocalStorage();
-	rewriteResultTable();
-
-	startPlay();
-}
-function showGameOverScreen() {
-	var screen = document.getElementById('pauseScreen');
-	screen.style.display = '';
-
-	gameOver = true;
-}
-function removeGameOverScreen() {
-	var screen = document.getElementById('pauseScreen');
-	screen.style.display = 'none';
-
-	gameOver = false;
-}
-
-
-
-
+//для работы с рейтингом пользователей
 function getLocalStorage() {
 	for (let i = 0; i < localStorage.length; i++) {
 		let player = {};
