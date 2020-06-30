@@ -11,6 +11,9 @@ table {
 	text-align: center;
 
 	display: inline-block;
+
+	border-top: 1px solid black;
+	border-left: 1px solid black;
 }
 th {
 	background: #AFCDE7;
@@ -27,10 +30,6 @@ th, td {
 td {
 	background: #c83e3e;
 }
-
-
-
-
 
 
 
@@ -55,6 +54,9 @@ input[type='button'] {
 }
 
 
+.curUser {
+	background: #7fac71;
+}
 
 #canvas {
 	margin-left: 20px;
@@ -86,4 +88,3 @@ input[type='button'] {
 	font-weight: bold;
 	font-size: 30px;
 }
-

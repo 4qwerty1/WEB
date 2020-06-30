@@ -1,7 +1,6 @@
 var canvas = document.getElementById('canvas');
 var ctx;
 var gun;
-var g = 10;
 var idTimer;
 var enemiesTimer;
 var enemies = [];
@@ -105,7 +104,7 @@ Bullet = new Class({
 
 		this.time++;
 		this.x += this.aX;
-		this.y += -this.aY + g * this.time / 2;
+		this.y += -this.aY + 10 * this.time / 2;
 	},
 	draw: function() {
 		ctx.fillStyle = this.color;
@@ -113,41 +112,6 @@ Bullet = new Class({
 		ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI, false);
 		ctx.closePath();
 		ctx.fill();
-
-
-		// //отрисовка промежутков
-		// ctx.beginPath();
-		// ctx.fillStyle = 'black';
-		// ctx.moveTo(this.lastX, this.lastY);
-		// ctx.lineTo(this.x, this.y);
-		// ctx.closePath();
-		// ctx.stroke();
-
-		// //отрисовка области попадания
-		// let rect = {
-		// 	x: Math.min(this.x, this.lastX), 
-		// 	y: Math.min(this.y, this.lastY),
-		// 	width: Math.max(this.x, this.lastX) - Math.min(this.x, this.lastX),
-		// 	height: Math.max(this.y, this.lastY) - Math.min(this.y, this.lastY),
-		// };
-		// ctx.beginPath();
-		// ctx.fillStyle = 'red';
-		// ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-		// ctx.closePath();
-
-		// //отрисовка промежуточных состояний пули
-		// ctx.beginPath();
-		// ctx.fillStyle = 'blue';
-		// let count = Math.round(Math.max(rect.width, rect.height) / this.radius);
-		// for (let i = 1; i < count; i++) {
-		// 	let m = (this.y - this.lastY > 0) ? -1 : 1;
-		// 	let bX = rect.x + i * rect.width / count; //координата x на отрезке
-		// 	let bY = rect.y + rect.height * (1/2 + m/2);
-		// 	bY -= m * rect.height / rect.width * i * rect.width / count; //y = x * tg(algha)
-		// 	ctx.arc(bX, bY, this.radius, 0, 2*Math.PI, false);
-		// }
-		// ctx.closePath();
-		// ctx.fill();
 	},
 });
 Bullet1 = new Class({
@@ -493,17 +457,9 @@ function goInput(event) {
 		if (reloadB1 == 100 && !pause) {
 			shotTB1 = Date.now();
 			reloadB1 = 0;
-			// bullets.push(new Bullet1());
 			bullets.push(new Bullet1());
 		}
 	}
-	// else if (event.which == 3) {
-	// 	if (reloadB2 == 100 && !pause) {
-	// 		shotTB2 = Date.now();
-	// 		reloadB2 = 0;
-	// 		bullets.push(new Bullet2());
-	// 	}
-	// }
 }
 function rightClick() {
 	if (reloadB2 == 100) {
@@ -553,8 +509,6 @@ function clearWindow() {
 function endGame() {
 	stopPlay();
 	showGameOverScreen();
-
-	// clearWindow();
 
 	setLocalStorage();
 }
@@ -629,6 +583,12 @@ function rewriteResultTable() {
 
 	var table = document.createElement('table');
 	table.setAttribute('id', 'results');
+
+	var header = document.createElement('tr');
+	header.innerHTML = '<td colspan="2" style="background: 	#7fac71;">Рекорды</td>';
+	table.appendChild(header);
+
+
 	for (let i of players) {
 		var tr = document.createElement('tr');
 		table.appendChild(tr);
@@ -642,7 +602,8 @@ function rewriteResultTable() {
 		td.innerHTML = i.value;
 
 		if (i == Player) {
-			tr.style.backgroundColor = '#CAECF9';
+			td.classList.add('curUser');
+			th.classList.add('curUser');
 		}
 	}
 
